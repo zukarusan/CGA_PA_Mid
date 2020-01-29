@@ -1,10 +1,5 @@
 future==0.18.2
 pygame==1.9.6
 pyglet==1.4.9
-<<<<<<< HEAD
 pyOpenGL==3.1.5
 pyOpenGL-accelerate==3.1.4
-=======
-PyOpenGL==3.1.5
-PyOpenGL-accelerate==3.1.4
->>>>>>> f2e629b2d653124c087ebc0215d1ba7147ff46ec
