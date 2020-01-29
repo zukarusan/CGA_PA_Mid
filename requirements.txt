@@ -1,0 +1,5 @@
+future==0.18.2
+pygame==1.9.6
+pyglet==1.4.9
+PyOpenGL==3.1.5
+PyOpenGL-accelerate==3.1.4
