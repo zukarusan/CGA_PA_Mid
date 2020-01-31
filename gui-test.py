@@ -49,6 +49,7 @@ class Application:
             )
 
     showDrawTools = True
+    showLayers = True
     showTestWindow = False
 
     def update(self, dt):
@@ -61,6 +62,9 @@ class Application:
 
         if self.showDrawTools:  # show Drawing Tools window
             self.drawTools()
+
+        if self.showLayers:
+            self.layers()
 
         if imgui.begin_main_menu_bar():  # stat menu bar (top bar)
 
@@ -83,6 +87,16 @@ class Application:
                         self.showDrawTools = False
                     else:
                         self.showDrawTools = True
+                imgui.end_menu()
+
+                clicked_layers, selected_layers = imgui.menu_item(
+                    "Layers", "", self.showLayers, True
+                )
+                if clicked_layers:
+                    if self.showLayers:
+                        self.showLayers = False
+                    else:
+                        self.showLayers = True
                 imgui.end_menu()
 
             # Example of a window, check line 59
@@ -111,16 +125,66 @@ class Application:
         imgui.button("Test Button", 100, 20)
         imgui.end()  # End window def: Custom Window
 
-    color = .0, .0, .0  # used for drawing color
+    # consider moving these to global scope
+    color = .0, .0, .0  # used for drawing color, set data type for pyglet.graphics.draw to c3f
+    drawMode = ""  # used to specify what to draw
+    vrad = 0  # store vertical radius for ellipse, radius for circle
+    hrad = 0  # stores horizontal radius for ellipse, unused for circle
+    x_center = 400  # see x_center in cga_lib.py
+    y_center = 300  # see y_center in cga_lib.py
 
     def drawTools(self):
         imgui.begin("Drawing Tools")
-        imgui.button("Circle", 100, 20)
-        imgui.button("Ellipse", 100, 20)
-        changed, self.color = imgui.color_edit3("Set Color", *self.color)
+        if imgui.button("Reset", 207, 20):
+            self.color = .0, .0, .0
+            self.drawMode = ""
+            self.vrad = 0
+            self.hrad = 0
+            self.x_center = 400
+            self.y_center = 300
+        if imgui.button("Circle", 100, 20):  # imgui.core.button, https://github.com/ocornut/imgui/issues/2481
+            self.drawMode = "c"
+        imgui.same_line(115)
+        if imgui.button("Ellipse", 100, 20):
+            self.drawMode = "e"
+        imgui.new_line()
+        if self.drawMode == "c":
+            changed, self.vrad = imgui.input_int("Radius", self.vrad, 1, 100)  # imgui.core.input_int
+            changed, self.x_center = imgui.slider_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
+            changed, self.y_center = imgui.slider_int("Y-axis center", self.y_center, 0, 600)
+            changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
+        elif self.drawMode == "e":
+            changed, self.vrad = imgui.input_int("Vertical Radius", self.vrad, 1, 100)  # imgui.core.input_int
+            # changed, self.vrad = imgui.slider_int("", self.vrad, 0, 1000)
+            changed, self.hrad = imgui.input_int("Horizontal Radius", self.hrad, 1, 100)
+            # changed, self.hrad = imgui.slider_int("Horizontal Radius", self.hrad, 0, 1000)
+            changed, self.x_center = imgui.slider_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
+            changed, self.y_center = imgui.slider_int("Y-axis center", self.y_center, 0, 600)
+            changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
 
+        imgui.new_line
+        imgui.begin_child("Current Settings", border=True)  # imgui.core.begin_child
+        imgui.text("Currently Drawing: ")  # imgui.core.text
+        if self.drawMode == "c":
+            imgui.same_line(200), imgui.text_colored("Circle", 0, 1, 0)  # imgui.core.same_line, imgui.core.text_colored
+            imgui.text("Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
+            imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
+            imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
+        elif self.drawMode == "e":
+            imgui.same_line(200), imgui.text_colored("Ellipse", 0, 1, 0)
+            imgui.text("V. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
+            imgui.text("H. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.hrad), 0, 1, 0)
+            imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
+            imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
+        else:
+            imgui.text("Nothing Selected")
+        imgui.end_child()
         imgui.end()
 
+    def layers(self):
+        imgui.begin("Layers")
+        # display layers here...
+        imgui.end()
 
 def main():
     app = Application()
