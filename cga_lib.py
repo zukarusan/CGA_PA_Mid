@@ -9,6 +9,7 @@ class Color:
 class Canvas:
     buffer = None
     def __init__(self, width, height, x=0, y=0, format="RGB"):
+        self.buffer = bytearray((width+1) * (width+1) * 3)
         glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
         self.width = width
         self.height = height
@@ -18,10 +19,13 @@ class Canvas:
         self.layers = []
 
     def add_object(self, drawable_object):
+        print(len(self.layers))
         glReadPixels(self.x_offset, self.y_offset, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
         drawable_object.set_layer_id(len(self.layers))
         self.layers.append(drawable_object)
         self.layers[-1].draw(set_pixel=self.set_pixel)
+        if len(self.layers) == 1:
+            glReadPixels(self.x_offset, self.y_offset, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
 
     def delete_object(self, id):
         self.layers.remove(self.layers[id])
