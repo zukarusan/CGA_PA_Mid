@@ -1,5 +1,52 @@
-class Circle:
+import pyglet
+from OpenGL.GL import *
+class Color:
+    def __init__(self, red, green, blue):
+        self.red = red
+        self.green = green
+        self.blue = blue
+
+class Canvas:
+    buffer = None
+    def __init__(self, width, height, x=0, y=0, format="RGB"):
+        glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
+        self.width = width
+        self.height = height
+        self.x_offset = x
+        self.y_offset = y
+        print(type(self.buffer))
+        self.layers = []
+
+    def add_object(self, drawable_object):
+        glReadPixels(self.x_offset, self.y_offset, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
+        drawable_object.set_layer_id(len(self.layers))
+        self.layers.append(drawable_object)
+        self.layers[-1].draw(set_pixel=self.set_pixel)
+
+    def delete_object(self, id):
+        self.layers.remove(self.layers[id])
+        glDrawPixels(self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
+
+    def set_pixel(self, x, y):
+        pyglet.graphics.draw(
+            1, pyglet.gl.GL_POINTS,
+            ('v2i', (x, y))
+        )
+
+class DrawableObject:
+    id = None
+    def __init__(self):
+        pass
+
+    def draw(self, set_pixel):
+        pass
+
+    def set_layer_id(self, id):
+        self.id = id
+
+class Circle(DrawableObject):
     def __init__(self, x_center, y_center, radius):
+        super().__init__()
         self.radius = radius
         self.x_center = x_center
         self.y_center = y_center
@@ -58,8 +105,9 @@ class Circle:
         pass
 
 
-class Ellipse:
+class Ellipse(DrawableObject):
     def __init__(self, x_center, y_center, v_radius, h_radius):
+        super().__init__()
         self.v_radius = v_radius
         self.h_radius = h_radius
         self.x_center = x_center
@@ -127,3 +175,5 @@ class Ellipse:
             set_pixel(self.x_center - x, self.y_center + y)
             set_pixel(self.x_center - x, self.y_center - y)
             set_pixel(self.x_center + x, self.y_center - y)
+        # buatin
+        pass
