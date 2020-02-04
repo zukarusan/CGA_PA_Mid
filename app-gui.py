@@ -13,7 +13,7 @@ class Application:
     canvas = Canvas()
     glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
     c1 = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
-    e1 = Ellipse(400, 300, 100, 50, color=Color(1.0, 1.0, 1.0))
+    e1 = Ellipse(400, 300, 100, 50, color=Color(1.0, 0.0, 0.0))
 
     def __init__(self):
         self.window = pyglet.window.Window(800, 600)
@@ -29,12 +29,12 @@ class Application:
                 self.canvas.delete_object(len(self.canvas.layers) - 1)
 
             elif symbol == key.C:  # circle
-                print("Adding Circle Object at (400, 300) with radius = 25")
+                print("[Test] Adding Circle Object at (400, 300) with radius = 25")
                 # circle(25, 400, 300)
                 self.render("c")
 
             elif symbol == key.E:  # ellipse
-                print("Adding Ellipse Object at (400, 300) with a = 100, b = 50")
+                print("[Test] Adding Ellipse Object at (400, 300) with a = 100, b = 50")
                 # ellipse(100, 50, 400, 300)
                 self.render("e")
 
@@ -62,7 +62,7 @@ class Application:
     def clear(self):
         gl.glClearColor(1, 1, 1, 1)
 
-    def render(self, object):  # reads from specified list argument to render objects
+    def render(self, object):  # reads from specified list argument to render objects, change this name
         if object == "c":
             self.canvas.add_object(self.c1)
         elif object == "e":
@@ -178,7 +178,7 @@ class Application:
         imgui.end()  # End window def: Custom Window
 
     # consider moving these to global scope?
-    color = .0, .0, .0  # used for drawing color, set data type for pyglet.graphics.draw to c3f
+    color = [.0, .0, .0]  # used for drawing color, set data type for pyglet.graphics.draw to c3f
     drawMode = ""  # used to specify what to draw
     vrad = 0  # store vertical radius for ellipse, radius for circle
     hrad = 0  # stores horizontal radius for ellipse, unused for circle
@@ -187,15 +187,6 @@ class Application:
 
     def drawTools(self):
         imgui.begin("Drawing Tools")
-        if imgui.button("Enter", 207, 20):
-            pass
-        if imgui.button("Reset", 207, 20):
-            self.color = .0, .0, .0
-            self.drawMode = ""
-            self.vrad = 0
-            self.hrad = 0
-            self.x_center = 400
-            self.y_center = 300
         if imgui.button("Circle", 100, 20):  # imgui.core.button, https://github.com/ocornut/imgui/issues/2481
             self.drawMode = "c"
         imgui.same_line(115)
@@ -233,11 +224,35 @@ class Application:
         else:
             imgui.text("Nothing Selected")
         imgui.end_child()
+        if imgui.button("Reset", 100, 20):
+            self.color = [.0, .0, .0]
+            self.drawMode = ""
+            self.vrad = 0
+            self.hrad = 0
+            self.x_center = 400
+            self.y_center = 300
+        imgui.same_line(115)
+        if imgui.button("Enter", 100, 20):
+            if self.drawMode == "":
+                pass
+            elif self.drawMode == "c":
+                tempCircle = Circle(self.x_center, self.y_center, self.vrad)
+                tempCircle.set_color(Color(self.color[0], self.color[1], self.color[2]))  # not working yet
+                self.canvas.add_object(tempCircle)
+            elif self.drawMode == "e":
+                tempEllipse = Ellipse(self.x_center, self.y_center, self.vrad, self.hrad)
+                tempEllipse.set_color(Color(self.color[0], self.color[1], self.color[2]))
+                self.canvas.add_object(tempEllipse)
+
         imgui.end()
 
     def layers(self):
         index = 0
         imgui.begin("Layers")
+        delete_index = -1
+        changed, delete_index = imgui.input_int("Layer to delete", delete_index, 1, 100)
+        if imgui.button("Delete", 100, 20):
+            self.canvas.delete_object(delete_index)
         for layer in self.canvas.layers:
             layer_str = "Layer: {}, type: {}"
             imgui.text(layer_str.format(index + 1, layer.type))
