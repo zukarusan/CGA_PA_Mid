@@ -3,8 +3,17 @@ import pyglet
 from pyglet import gl
 import imgui
 from imgui.integrations.pyglet import PygletRenderer
+from pyglet.gl import *
+from pyglet.window import key  # for key input, on_key_press
+from cga_lib import Circle, Ellipse, Canvas # include file cga_lib
+from pyglet.window import mouse  # for mouse input, on_mouse_press
+
 
 class Application:
+    canvas = Canvas()
+    glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
+    c1 = Circle(400, 300, 25)
+    e1 = Ellipse(400, 300, 100, 50)
 
     def __init__(self):
         self.window = pyglet.window.Window(800, 600)
@@ -12,8 +21,52 @@ class Application:
         self.renderer = PygletRenderer(self.window)
         self.impl = PygletRenderer(self.window)
 
+        @self.window.event
+        def on_key_press(symbol, modifiers):  # keyboard input handler
+            if symbol == key.X:  # delete last object
+                print("Delete Last object")
+                self.window.clear()
+                self.canvas.delete_object(len(self.canvas.layers) - 1)
+
+            elif symbol == key.C:  # circle
+                print("Adding Circle Object at (400, 300) with radius = 25")
+                # circle(25, 400, 300)
+                self.render("c")
+
+            elif symbol == key.E:  # ellipse
+                print("Adding Ellipse Object at (400, 300) with a = 100, b = 50")
+                # ellipse(100, 50, 400, 300)
+                self.render("e")
+
+        ''' TODO: mouse input, currently pyglet still captures mouse inputs on top of imgui elements
+        @self.window.event
+        def on_mouse_motion(x, y, dx, dy):
+            pass
+
+        @self.window.event
+        def on_mouse_press(x, y, button, modifiers):
+            if button & mouse.LEFT:
+                self.x_center = x
+                self.y_center = y
+                print("Mouse left click, position:", x,  y)
+
+        @self.window.event
+        def on_mouse_release(x, y, button, modifiers):
+            pass
+
+        @self.window.event
+        def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
+            pass
+        '''
+
     def clear(self):
         gl.glClearColor(1, 1, 1, 1)
+
+    def render(self, object):  # reads from specified list argument to render objects
+        if object == "c":
+            self.canvas.add_object(self.c1)
+        elif object == "e":
+            self.canvas.add_object(self.e1)
 
     def dispatch(self):
         self.clear()
@@ -83,7 +136,6 @@ class Application:
                         self.showDrawTools = False
                     else:
                         self.showDrawTools = True
-                imgui.end_menu()
 
                 clicked_layers, selected_layers = imgui.menu_item(
                     "Layers", "", self.showLayers, True
@@ -118,10 +170,12 @@ class Application:
         imgui.begin("Custom window", False)  # start new window: Custom Window
         imgui.text("Bar")  # text label
         imgui.text_colored("Eggs", 0.2, 1., 0.)  # colored text label (text, r, g , b)
-        imgui.button("Test Button", 100, 20)
+        if imgui.button("Test Circle", 100, 20):
+            print("Adding Circle Object at (400, 300) with radius = 25")
+            self.render('c')
         imgui.end()  # End window def: Custom Window
 
-    # consider moving these to global scope
+    # consider moving these to global scope?
     color = .0, .0, .0  # used for drawing color, set data type for pyglet.graphics.draw to c3f
     drawMode = ""  # used to specify what to draw
     vrad = 0  # store vertical radius for ellipse, radius for circle
@@ -131,6 +185,8 @@ class Application:
 
     def drawTools(self):
         imgui.begin("Drawing Tools")
+        if imgui.button("Enter", 207, 20):
+            pass
         if imgui.button("Reset", 207, 20):
             self.color = .0, .0, .0
             self.drawMode = ""
@@ -181,3 +237,14 @@ class Application:
         imgui.begin("Layers")
         # display layers here...
         imgui.end()
+
+
+def main():
+    app = Application()
+    app.dispatch()
+    app.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
