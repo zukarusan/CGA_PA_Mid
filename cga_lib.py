@@ -48,13 +48,13 @@ class DrawableObject:
     It is aimed to create object to be drawn in the canvas manner.
     """
 
-    def __init__(self):
+    def __init__(self, color=Color(1.0, 1.0, 1.0)):
         self.id = None  # ID for layer in canvas
         self.colors = []  # Color buffers created to be specified when drwaing
         self.points = []  # Point buffers created to be drawn in canvas
         self.buffer_size = None  # Number of buffers
         self.create_buffer()  # Draw to buffer, specified by derived class
-        self.set_color(Color(1.0, 1.0, 1.0))  # Default color, black
+        self.set_color(color)  # Default color, black
 
     def create_buffer(self):  # Drawing function by creating the points and color buffers instead and later
         pass                  # to be drawn in canvas. Specified in each derived class.
@@ -65,20 +65,20 @@ class DrawableObject:
     def set_color(self, color):
         if not self.buffer_size == 0:
             for b in range(self.buffer_size):
-                self.colors += color.red
-                self.colors += color.green
-                self.colors += color.blue
+                self.colors += [color.red]
+                self.colors += [color.green]
+                self.colors += [color.blue]
         else:
             print("Buffer is empty")
 
 
 
 class Circle(DrawableObject):
-    def __init__(self, x_center, y_center, radius):
-        super().__init__()
+    def __init__(self, x_center, y_center, radius, **kwargs):
         self.radius = radius
         self.x_center = x_center
         self.y_center = y_center
+        super().__init__(**kwargs)
 
     def create_buffer(self):
         # Drawing circle using Second-Order Midpoint Algorithm
@@ -123,17 +123,16 @@ class Circle(DrawableObject):
                 y = y - 1
             x = x + 1
 
-        self.buffer_size = len((self.points // 2))
+        self.buffer_size = len(self.points) // 2
 
 
 class Ellipse(DrawableObject):
-    def __init__(self, x_center, y_center, v_radius, h_radius):
-        super().__init__()
+    def __init__(self, x_center, y_center, v_radius, h_radius, **kwargs):
         self.v_radius = v_radius
         self.h_radius = h_radius
         self.x_center = x_center
         self.y_center = y_center
-        self.create_buffer()
+        super().__init__(**kwargs)
 
     def create_buffer(self):
         x = 0
@@ -192,4 +191,4 @@ class Ellipse(DrawableObject):
             self.points += [self.x_center - x, self.y_center - y]
             self.points += [self.x_center + x, self.y_center - y]
 
-        self.buffer_size = len((self.points // 2))
+        self.buffer_size = len(self.points) // 2
