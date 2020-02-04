@@ -204,16 +204,16 @@ class Application:
         imgui.new_line()
         if self.drawMode == "c":
             changed, self.vrad = imgui.input_int("Radius", self.vrad, 1, 100)  # imgui.core.input_int
-            changed, self.x_center = imgui.slider_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
-            changed, self.y_center = imgui.slider_int("Y-axis center", self.y_center, 0, 600)
+            changed, self.x_center = imgui.input_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
+            changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 0, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
         elif self.drawMode == "e":
             changed, self.vrad = imgui.input_int("Vertical Radius", self.vrad, 1, 100)  # imgui.core.input_int
             # changed, self.vrad = imgui.slider_int("", self.vrad, 0, 1000)
             changed, self.hrad = imgui.input_int("Horizontal Radius", self.hrad, 1, 100)
             # changed, self.hrad = imgui.slider_int("Horizontal Radius", self.hrad, 0, 1000)
-            changed, self.x_center = imgui.slider_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
-            changed, self.y_center = imgui.slider_int("Y-axis center", self.y_center, 0, 600)
+            changed, self.x_center = imgui.input_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
+            changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 0, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
 
         imgui.new_line
