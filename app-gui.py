@@ -236,8 +236,12 @@ class Application:
         imgui.end()
 
     def layers(self):
+        index = 0
         imgui.begin("Layers")
-        # display layers here...
+        for layer in self.canvas.layers:
+            layer_str = "Layer: {}, type: {}"
+            imgui.text(layer_str.format(index + 1, layer.type))
+            index = index + 1
         imgui.end()
 
 
