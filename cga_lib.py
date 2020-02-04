@@ -7,46 +7,45 @@ class Color:
         self.blue = blue
 
 class Canvas:
-    buffer = None
     def __init__(self, width, height, x=0, y=0, format="RGB"):
-        self.buffer = bytearray((width+1) * (width+1) * 3)
-        glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
         self.width = width
         self.height = height
         self.x_offset = x
         self.y_offset = y
-        print(type(self.buffer))
         self.layers = []
 
     def add_object(self, drawable_object):
-        print(len(self.layers))
-        glReadPixels(self.x_offset, self.y_offset, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
         drawable_object.set_layer_id(len(self.layers))
         self.layers.append(drawable_object)
-        self.layers[-1].draw(set_pixel=self.set_pixel)
-        if len(self.layers) == 1:
-            glReadPixels(self.x_offset, self.y_offset, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
+
+    def draw_layers(self):
+        for layer in self.layers:
+            pyglet.graphics.draw (
+                len(layer.points) // 2,
+                pyglet.gl.GL_POINTS,
+                ('v2i', layer.points)
+            )
 
     def delete_object(self, id):
-        self.layers.remove(self.layers[id])
-        glDrawPixels(self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, self.buffer)
-
-    def set_pixel(self, x, y):
-        pyglet.graphics.draw(
-            1, pyglet.gl.GL_POINTS,
-            ('v2i', (x, y))
-        )
+        try:
+            self.layers.remove(self.layers[id])
+        except:
+            print("Object with id ", id, " doesn't exist")
 
 class DrawableObject:
-    id = None
     def __init__(self):
-        pass
+        self.id = None
+        self.points = []
 
-    def draw(self, set_pixel):
+    def create_points(self):
         pass
 
     def set_layer_id(self, id):
         self.id = id
+
+    def color(self, color):
+        # buatin
+        pass
 
 class Circle(DrawableObject):
     def __init__(self, x_center, y_center, radius):
@@ -54,14 +53,9 @@ class Circle(DrawableObject):
         self.radius = radius
         self.x_center = x_center
         self.y_center = y_center
+        self.create_points()
 
-    def draw(self, set_pixel):
-        """
-        This method draw given circle properties using Second-Order MidPoint Algorithm
-        :param set_pixel: FUNCTION with (x, y) ARGUMENT. A user-defined pixel drawing function to be passed.
-        Argument only take x and y (x, y) to be drawn
-        :return: Lorem ipsum hiya hiya hiya
-        """
+    def create_points(self):
         # Drawing circle using Second-Order Midpoint Algorithm
         x = 0
         y = self.radius
@@ -71,27 +65,27 @@ class Circle(DrawableObject):
         while x < y:
             # quadrant 1
             # (x, y)
-            set_pixel(self.x_center + x, self.y_center + y)
+            self.points += [self.x_center + x, self.y_center + y]
             # (y, x)
-            set_pixel(self.x_center + y, self.y_center + x)
+            self.points += [self.x_center + y, self.y_center + x]
 
             # quadrant 2
             # (-x, y)
-            set_pixel(self.x_center - x, self.y_center + y)
+            self.points += [self.x_center - x, self.y_center + y]
             # (-y, x)
-            set_pixel(self.x_center - y, self.y_center + x)
+            self.points += [self.x_center - y, self.y_center + x]
 
             # quadrant 3
             # (-x, -y)
-            set_pixel(self.x_center - x, self.y_center - y)
+            self.points += [self.x_center - x, self.y_center - y]
             # (-y, -x)
-            set_pixel(self.x_center - y, self.y_center - x)
+            self.points += [self.x_center - y, self.y_center - x]
 
             # quadrant 4
             # (x, -y)
-            set_pixel(self.x_center + x, self.y_center - y)
+            self.points += [self.x_center + x, self.y_center - y]
             # (y, -x)
-            set_pixel(self.x_center + y, self.y_center - x)
+            self.points += [self.x_center + y, self.y_center - x]
 
             if d < 0:
                 d = d + d_cont
@@ -104,10 +98,6 @@ class Circle(DrawableObject):
                 y = y - 1
             x = x + 1
 
-    def color(self, r, g, b):
-        # buatin
-        pass
-
 
 class Ellipse(DrawableObject):
     def __init__(self, x_center, y_center, v_radius, h_radius):
@@ -116,14 +106,9 @@ class Ellipse(DrawableObject):
         self.h_radius = h_radius
         self.x_center = x_center
         self.y_center = y_center
+        self.create_points()
 
-    def draw(self, set_pixel):
-        """
-            This method draw given ellipse properties using Second-Order MidPoint Algorithm
-            :param set_pixel: FUNCTION with (x, y) ARGUMENT. A user-defined pixel drawing function to be passed.
-            Arguments only take x and y (x, y) pixel coordinate to be drawn
-            :return: Lorem ipsum hiya hiya hiya
-        """
+    def create_points(self):
         x = 0
         y = self.h_radius
 
@@ -136,10 +121,10 @@ class Ellipse(DrawableObject):
         dr = h_sqr * 3
         ddr = dr + 2 * v_sqr * (1 - self.h_radius)
 
-        set_pixel(self.x_center + x, self.y_center + y)
-        set_pixel(self.x_center - x, self.y_center + y)
-        set_pixel(self.x_center - x, self.y_center - y)
-        set_pixel(self.x_center + x, self.y_center - y)
+        self.points += [self.x_center + x, self.y_center + y]
+        self.points += [self.x_center - x, self.y_center + y]
+        self.points += [self.x_center - x, self.y_center - y]
+        self.points += [self.x_center + x, self.y_center - y]
 
         # Region 1
         while 2 * h_sqr * (x + 1) < v_sqr * (2 * y - 1):
@@ -153,10 +138,10 @@ class Ellipse(DrawableObject):
                 dr = dr + 2 * h_sqr
                 ddr = ddr + 2 * h_sqr
             x = x + 1
-            set_pixel(self.x_center + x, self.y_center + y)
-            set_pixel(self.x_center - x, self.y_center + y)
-            set_pixel(self.x_center - x, self.y_center - y)
-            set_pixel(self.x_center + x, self.y_center - y)
+            self.points += [self.x_center + x, self.y_center + y]
+            self.points += [self.x_center - x, self.y_center + y]
+            self.points += [self.x_center - x, self.y_center - y]
+            self.points += [self.x_center + x, self.y_center - y]
 
         # All the d's in region 1
         dd = v_sqr * (3 - 2 * y)
@@ -175,9 +160,8 @@ class Ellipse(DrawableObject):
                 ddr = ddr + 2 * v_sqr
                 dd = dd + 2 * v_sqr
             y = y - 1
-            set_pixel(self.x_center + x, self.y_center + y)
-            set_pixel(self.x_center - x, self.y_center + y)
-            set_pixel(self.x_center - x, self.y_center - y)
-            set_pixel(self.x_center + x, self.y_center - y)
+            self.points += [self.x_center + x, self.y_center + y]
+            self.points += [self.x_center - x, self.y_center + y]
+            self.points += [self.x_center - x, self.y_center - y]
+            self.points += [self.x_center + x, self.y_center - y]
         # buatin
-        pass
