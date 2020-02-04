@@ -5,15 +5,15 @@ import imgui
 from imgui.integrations.pyglet import PygletRenderer
 from pyglet.gl import *
 from pyglet.window import key  # for key input, on_key_press
-from cga_lib import Circle, Ellipse, Canvas # include file cga_lib
+from cga_lib import Circle, Ellipse, Canvas, Color # include file cga_lib
 from pyglet.window import mouse  # for mouse input, on_mouse_press
 
 
 class Application:
     canvas = Canvas()
     glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
-    c1 = Circle(400, 300, 25)
-    e1 = Ellipse(400, 300, 100, 50)
+    c1 = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
+    e1 = Ellipse(400, 300, 100, 50, color=Color(1.0, 1.0, 1.0))
 
     def __init__(self):
         self.window = pyglet.window.Window(800, 600)
@@ -74,6 +74,7 @@ class Application:
         @self.window.event
         def on_draw():
             self.window.clear()
+            glClear(GL_COLOR_BUFFER_BIT)
             self.update(1 / 60.0)
             imgui.render()
             self.impl.render(imgui.get_draw_data())
@@ -104,6 +105,7 @@ class Application:
     def update(self, dt):
         imgui.new_frame()
 
+        self.canvas.draw_layers()
         self.crosshair()
 
         if self.showTestWindow:
@@ -247,4 +249,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
