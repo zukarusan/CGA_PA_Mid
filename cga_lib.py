@@ -26,10 +26,10 @@ class Canvas:
     def draw_layers(self):
         for layer in self.layers:  # Draw for each 2D shape objects in layer list
             draw(
-                len(layer.points) // 2,
+                layer.buffer_size,
                 GL_POINTS,
                 ('v2i', layer.points),
-                ('c3f', (1.0, 1.0, 1.0))
+                ('c3f', layer.colors)
             )
 
     def delete_object(self, id):  # Delete for the specified ID of the layer list
@@ -50,17 +50,27 @@ class DrawableObject:
 
     def __init__(self):
         self.id = None  # ID for layer in canvas
-        self.points = []  # Points created to be drawn in canvas
-        self.color = Color(1.0, 1.0, 1.0)
+        self.colors = []  # Color buffers created to be specified when drwaing
+        self.points = []  # Point buffers created to be drawn in canvas
+        self.buffer_size = None  # Number of buffers
+        self.create_buffer()  # Draw to buffer, specified by derived class
+        self.set_color(Color(1.0, 1.0, 1.0))  # Default color, black
 
-    def create_points(self):  # Drawing function by creating the points instead and later to be drawn in canvas
-        pass
+    def create_buffer(self):  # Drawing function by creating the points and color buffers instead and later
+        pass                  # to be drawn in canvas. Specified in each derived class.
 
     def set_layer_id(self, id):  # Function to set the id in canvas layers
         self.id = id
 
-    def color(self, color):
-        self.color = color
+    def set_color(self, color):
+        if not self.buffer_size == 0:
+            for b in range(self.buffer_size):
+                self.colors += color.red
+                self.colors += color.green
+                self.colors += color.blue
+        else:
+            print("Buffer is empty")
+
 
 
 class Circle(DrawableObject):
@@ -69,9 +79,8 @@ class Circle(DrawableObject):
         self.radius = radius
         self.x_center = x_center
         self.y_center = y_center
-        self.create_points()
 
-    def create_points(self):
+    def create_buffer(self):
         # Drawing circle using Second-Order Midpoint Algorithm
         x = 0
         y = self.radius
@@ -114,6 +123,8 @@ class Circle(DrawableObject):
                 y = y - 1
             x = x + 1
 
+        self.buffer_size = len((self.points // 2))
+
 
 class Ellipse(DrawableObject):
     def __init__(self, x_center, y_center, v_radius, h_radius):
@@ -122,9 +133,9 @@ class Ellipse(DrawableObject):
         self.h_radius = h_radius
         self.x_center = x_center
         self.y_center = y_center
-        self.create_points()
+        self.create_buffer()
 
-    def create_points(self):
+    def create_buffer(self):
         x = 0
         y = self.h_radius
 
@@ -180,4 +191,5 @@ class Ellipse(DrawableObject):
             self.points += [self.x_center - x, self.y_center + y]
             self.points += [self.x_center - x, self.y_center - y]
             self.points += [self.x_center + x, self.y_center - y]
-        # buatin
+
+        self.buffer_size = len((self.points // 2))
