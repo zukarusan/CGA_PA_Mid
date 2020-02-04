@@ -12,7 +12,7 @@ class Color:
 
 class Canvas:
     """
-        This canvas class behaves abstractly under running window. Similar to photoshop, it is aimed to
+        This canvas class behaves abstractly under running window. Similar to Photoshop, it is aimed to
         allocate layers and maintaining objects to be drawn.
     """
 
@@ -28,7 +28,8 @@ class Canvas:
             draw(
                 len(layer.points) // 2,
                 GL_POINTS,
-                ('v2i', layer.points)
+                ('v2i', layer.points),
+                ('c3f', (1.0, 1.0, 1.0))
             )
 
     def delete_object(self, id):  # Delete for the specified ID of the layer list
@@ -50,6 +51,7 @@ class DrawableObject:
     def __init__(self):
         self.id = None  # ID for layer in canvas
         self.points = []  # Points created to be drawn in canvas
+        self.color = Color(1.0, 1.0, 1.0)
 
     def create_points(self):  # Drawing function by creating the points instead and later to be drawn in canvas
         pass
@@ -58,8 +60,7 @@ class DrawableObject:
         self.id = id
 
     def color(self, color):
-        # buatin
-        pass
+        self.color = color
 
 
 class Circle(DrawableObject):
