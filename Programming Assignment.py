@@ -5,7 +5,7 @@ from cga_lib import Circle, Ellipse, Canvas #include file cga_lib
 from pyglet.window import mouse  # for mouse input, on_mouse_press
 
 window = pyglet.window.Window(800, 600)  # create a window object with the resolution of 800x600
-canvas = Canvas(800, 600)
+# canvas = Canvas(800, 600)
 window.set_caption('Programming Assignment')
 glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
 c1 = Circle(400, 300, 25)
