@@ -19,6 +19,7 @@ def render(object):  # reads from specified list argument to render objects
 
 @window.event
 def on_draw():
+    glClear(GL_COLOR_BUFFER_BIT)
     canvas.draw_layers()
 
 @window.event  # target window

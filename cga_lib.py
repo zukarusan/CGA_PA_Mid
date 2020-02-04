@@ -1,51 +1,66 @@
-import pyglet
-from OpenGL.GL import *
+from pyglet.graphics import draw  # Using draw function
+from pyglet.gl import GL_POINTS  # Using point variable in OpenGL library
+
+
 class Color:
+    # Class for defining colors
     def __init__(self, red, green, blue):
         self.red = red
         self.green = green
         self.blue = blue
 
+
 class Canvas:
-    def __init__(self, width, height, x=0, y=0, format="RGB"):
-        self.width = width
-        self.height = height
-        self.x_offset = x
-        self.y_offset = y
-        self.layers = []
+    """
+        This canvas class behaves abstractly under running window. Similar to photoshop, it is aimed to
+        allocate layers and maintaining objects to be drawn.
+    """
+
+    def __init__(self):
+        self.layers = []  # Create layers upon instantiation
 
     def add_object(self, drawable_object):
-        drawable_object.set_layer_id(len(self.layers))
-        self.layers.append(drawable_object)
+        drawable_object.set_layer_id(len(self.layers))  # Set id to track in later use
+        self.layers.append(drawable_object)  # Adding the 2D shape object into the last of the layer list
 
     def draw_layers(self):
-        for layer in self.layers:
-            pyglet.graphics.draw (
+        for layer in self.layers:  # Draw for each 2D shape objects in layer list
+            draw(
                 len(layer.points) // 2,
-                pyglet.gl.GL_POINTS,
+                GL_POINTS,
                 ('v2i', layer.points)
             )
 
-    def delete_object(self, id):
+    def delete_object(self, id):  # Delete for the specified ID of the layer list
         try:
             self.layers.remove(self.layers[id])
         except:
-            print("Object with id ", id, " doesn't exist")
+            if id == -1:
+                print("layer is empty")
+            else:
+                print("Object with id ", id, " doesn't exist in the layer list")
+
 
 class DrawableObject:
-    def __init__(self):
-        self.id = None
-        self.points = []
+    """
+    This class is a parent class for any derived class which is in the manner of 2D shape.
+    It is aimed to create object to be drawn in the canvas manner.
+    """
 
-    def create_points(self):
+    def __init__(self):
+        self.id = None  # ID for layer in canvas
+        self.points = []  # Points created to be drawn in canvas
+
+    def create_points(self):  # Drawing function by creating the points instead and later to be drawn in canvas
         pass
 
-    def set_layer_id(self, id):
+    def set_layer_id(self, id):  # Function to set the id in canvas layers
         self.id = id
 
     def color(self, color):
         # buatin
         pass
+
 
 class Circle(DrawableObject):
     def __init__(self, x_center, y_center, radius):
