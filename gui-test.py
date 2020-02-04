@@ -87,7 +87,6 @@ class Application:
                         self.showDrawTools = False
                     else:
                         self.showDrawTools = True
-                imgui.end_menu()
 
                 clicked_layers, selected_layers = imgui.menu_item(
                     "Layers", "", self.showLayers, True
