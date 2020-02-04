@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import pyglet
-from pyglet import gl
+from pyglet.gl import *
 
 import imgui
 from imgui.integrations.pyglet import PygletRenderer
@@ -17,7 +17,7 @@ class Application:
         self.impl = PygletRenderer(self.window)
 
     def clear(self):
-        gl.glClearColor(1, 1, 1, 1)
+        glClearColor(1, 1, 1, 1)
 
     def dispatch(self):
         self.clear()
@@ -25,6 +25,7 @@ class Application:
         @self.window.event
         def on_draw():
             self.window.clear()
+            glClear(GL_COLOR_BUFFER_BIT)
             self.update(1 / 60.0)
             imgui.render()
             self.impl.render(imgui.get_draw_data())
