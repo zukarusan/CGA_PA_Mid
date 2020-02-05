@@ -12,10 +12,10 @@ from pyglet.window import mouse  # for mouse input, on_mouse_press
 class Application:
     canvas = Canvas()
     glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
+    circle = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
+    ellipse = Ellipse(400, 300, 100, 50, color=Color(1.0, 1.0, 1.0))
 
     def __init__(self):
-        self.circle = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
-        self.ellipse = Ellipse(400, 300, 100, 50, color=Color(1.0, 1.0, 1.0))
         self.window = pyglet.window.Window(800, 600)
         imgui.create_context()
         self.renderer = PygletRenderer(self.window)
@@ -188,8 +188,7 @@ class Application:
     def drawTools(self):
         imgui.begin("Drawing Tools")
         if imgui.button("Enter", 207, 20):
-            self.render(self.drawMode)
-            print(self.color[0], " ", self.color[1], " ", self.color[2])
+            pass
         if imgui.button("Reset", 207, 20):
             self.color = .0, .0, .0
             self.drawMode = ""
@@ -251,12 +250,12 @@ class Application:
             if self.drawMode == "":
                 pass
             elif self.drawMode == "c":
-                tempCircle = Circle(self.x_center, self.y_center, self.vrad)
-                tempCircle.set_color(Color(self.color[0], self.color[1], self.color[2]))  # not working yet
+                tempCircle = Circle(self.x_center, self.y_center, self.vrad,
+                                    color=Color(self.color[0], self.color[1], self.color[2]))
                 self.canvas.add_object(tempCircle)
             elif self.drawMode == "e":
-                tempEllipse = Ellipse(self.x_center, self.y_center, self.vrad, self.hrad)
-                tempEllipse.set_color(Color(self.color[0], self.color[1], self.color[2]))
+                tempEllipse = Ellipse(self.x_center, self.y_center, self.vrad, self.hrad,
+                                      color=Color(self.color[0], self.color[1], self.color[2]))
                 self.canvas.add_object(tempEllipse)
 
         imgui.end()
