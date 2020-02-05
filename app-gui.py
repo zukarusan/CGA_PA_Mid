@@ -209,7 +209,7 @@ class Application:
             changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 1, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
             self.circle = Circle(self.x_center, self.y_center, self.vrad,
-                                 color=Color(1.0 - self.color[0], 1.0 - self.color[1], 1.0 - self.color[2]))
+                                 color=Color(self.color[0], self.color[1], self.color[2]))
         elif self.drawMode == 'e':
             changed, self.vrad = imgui.input_int("Vertical Radius", self.vrad, 1, 100)  # imgui.core.input_int
             # changed, self.vrad = imgui.slider_int("", self.vrad, 0, 1000)
@@ -220,7 +220,7 @@ class Application:
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
             self.ellipse = Ellipse(self.x_center, self.y_center,
                                    self.vrad, self.hrad,
-                                   color=Color(1.0 - self.color[0], 1.0 - self.color[1], 1.0 - self.color[2]))
+                                   color=Color(self.color[0], self.color[1], self.color[2]))
 
         imgui.new_line
         imgui.begin_child("Current Settings", border=True)  # imgui.core.begin_child
