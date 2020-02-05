@@ -12,12 +12,6 @@ from pyglet.window import mouse  # for mouse input, on_mouse_press
 class Application:
     canvas = Canvas()
     glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
-<<<<<<< HEAD
-
-=======
-    c1 = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
-    e1 = Ellipse(400, 300, 100, 50, color=Color(1.0, 0.0, 0.0))
->>>>>>> 710815927bfd299fa446cb50fcebb71495288fe0
 
     def __init__(self):
         self.circle = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
@@ -215,7 +209,7 @@ class Application:
             changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 1, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
             self.circle = Circle(self.x_center, self.y_center, self.vrad,
-                                 color=Color(self.color[0], self.color[1], self.color[2]))
+                                 color=Color(1.0 - self.color[0], 1.0 - self.color[1], 1.0 - self.color[2]))
         elif self.drawMode == 'e':
             changed, self.vrad = imgui.input_int("Vertical Radius", self.vrad, 1, 100)  # imgui.core.input_int
             # changed, self.vrad = imgui.slider_int("", self.vrad, 0, 1000)
@@ -225,7 +219,8 @@ class Application:
             changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 1, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
             self.ellipse = Ellipse(self.x_center, self.y_center,
-                                   self.vrad, self.hrad, color=Color(self.color[0], self.color[1], self.color[2]))
+                                   self.vrad, self.hrad,
+                                   color=Color(1.0 - self.color[0], 1.0 - self.color[1], 1.0 - self.color[2]))
 
         imgui.new_line
         imgui.begin_child("Current Settings", border=True)  # imgui.core.begin_child
