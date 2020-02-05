@@ -12,14 +12,23 @@ from pyglet.window import mouse  # for mouse input, on_mouse_press
 class Application:
     canvas = Canvas()
     glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
-    c1 = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
-    e1 = Ellipse(400, 300, 100, 50, color=Color(1.0, 1.0, 1.0))
+
 
     def __init__(self):
+        self.circle = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
+        self.ellipse = Ellipse(400, 300, 100, 50, color=Color(1.0, 1.0, 1.0))
         self.window = pyglet.window.Window(800, 600)
         imgui.create_context()
         self.renderer = PygletRenderer(self.window)
         self.impl = PygletRenderer(self.window)
+
+        @self.window.event
+        def on_draw():
+            self.window.clear()
+            glClear(GL_COLOR_BUFFER_BIT)
+            self.update(1 / 60.0)
+            imgui.render()
+            self.impl.render(imgui.get_draw_data())
 
         @self.window.event
         def on_key_press(symbol, modifiers):  # keyboard input handler
@@ -64,20 +73,12 @@ class Application:
 
     def render(self, object):  # reads from specified list argument to render objects
         if object == "c":
-            self.canvas.add_object(self.c1)
+            self.canvas.add_object(self.circle)
         elif object == "e":
-            self.canvas.add_object(self.e1)
+            self.canvas.add_object(self.ellipse)
 
     def dispatch(self):
         self.clear()
-
-        @self.window.event
-        def on_draw():
-            self.window.clear()
-            glClear(GL_COLOR_BUFFER_BIT)
-            self.update(1 / 60.0)
-            imgui.render()
-            self.impl.render(imgui.get_draw_data())
 
         pyglet.app.run()
 
@@ -188,7 +189,8 @@ class Application:
     def drawTools(self):
         imgui.begin("Drawing Tools")
         if imgui.button("Enter", 207, 20):
-            pass
+            self.render(self.drawMode)
+            print(self.color[0], " ", self.color[1], " ", self.color[2])
         if imgui.button("Reset", 207, 20):
             self.color = .0, .0, .0
             self.drawMode = ""
@@ -197,17 +199,19 @@ class Application:
             self.x_center = 400
             self.y_center = 300
         if imgui.button("Circle", 100, 20):  # imgui.core.button, https://github.com/ocornut/imgui/issues/2481
-            self.drawMode = "c"
+            self.drawMode = 'c'
         imgui.same_line(115)
         if imgui.button("Ellipse", 100, 20):
-            self.drawMode = "e"
+            self.drawMode = 'e'
         imgui.new_line()
-        if self.drawMode == "c":
+        if self.drawMode == 'c':
             changed, self.vrad = imgui.input_int("Radius", self.vrad, 1, 100)  # imgui.core.input_int
             changed, self.x_center = imgui.slider_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
             changed, self.y_center = imgui.slider_int("Y-axis center", self.y_center, 0, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
-        elif self.drawMode == "e":
+            self.circle = Circle(self.x_center, self.y_center, self.vrad,
+                                 color=Color(self.color[0], self.color[1], self.color[2]))
+        elif self.drawMode == 'e':
             changed, self.vrad = imgui.input_int("Vertical Radius", self.vrad, 1, 100)  # imgui.core.input_int
             # changed, self.vrad = imgui.slider_int("", self.vrad, 0, 1000)
             changed, self.hrad = imgui.input_int("Horizontal Radius", self.hrad, 1, 100)
@@ -215,6 +219,8 @@ class Application:
             changed, self.x_center = imgui.slider_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
             changed, self.y_center = imgui.slider_int("Y-axis center", self.y_center, 0, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
+            self.ellipse = Ellipse(self.x_center, self.y_center,
+                                   self.vrad, self.hrad, color=Color(self.color[0], self.color[1], self.color[2]))
 
         imgui.new_line
         imgui.begin_child("Current Settings", border=True)  # imgui.core.begin_child
