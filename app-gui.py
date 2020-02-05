@@ -12,7 +12,12 @@ from pyglet.window import mouse  # for mouse input, on_mouse_press
 class Application:
     canvas = Canvas()
     glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
+<<<<<<< HEAD
 
+=======
+    c1 = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
+    e1 = Ellipse(400, 300, 100, 50, color=Color(1.0, 0.0, 0.0))
+>>>>>>> 710815927bfd299fa446cb50fcebb71495288fe0
 
     def __init__(self):
         self.circle = Circle(400, 300, 25, color=Color(1.0, 0.0, 0.0))
@@ -38,12 +43,12 @@ class Application:
                 self.canvas.delete_object(len(self.canvas.layers) - 1)
 
             elif symbol == key.C:  # circle
-                print("Adding Circle Object at (400, 300) with radius = 25")
+                print("[Test] Adding Circle Object at (400, 300) with radius = 25")
                 # circle(25, 400, 300)
                 self.render("c")
 
             elif symbol == key.E:  # ellipse
-                print("Adding Ellipse Object at (400, 300) with a = 100, b = 50")
+                print("[Test] Adding Ellipse Object at (400, 300) with a = 100, b = 50")
                 # ellipse(100, 50, 400, 300)
                 self.render("e")
 
@@ -71,7 +76,7 @@ class Application:
     def clear(self):
         gl.glClearColor(1, 1, 1, 1)
 
-    def render(self, object):  # reads from specified list argument to render objects
+    def render(self, object):  # reads from specified list argument to render objects, change this name
         if object == "c":
             self.canvas.add_object(self.circle)
         elif object == "e":
@@ -179,7 +184,7 @@ class Application:
         imgui.end()  # End window def: Custom Window
 
     # consider moving these to global scope?
-    color = .0, .0, .0  # used for drawing color, set data type for pyglet.graphics.draw to c3f
+    color = [.0, .0, .0]  # used for drawing color, set data type for pyglet.graphics.draw to c3f
     drawMode = ""  # used to specify what to draw
     vrad = 0  # store vertical radius for ellipse, radius for circle
     hrad = 0  # stores horizontal radius for ellipse, unused for circle
@@ -206,8 +211,8 @@ class Application:
         imgui.new_line()
         if self.drawMode == 'c':
             changed, self.vrad = imgui.input_int("Radius", self.vrad, 1, 100)  # imgui.core.input_int
-            changed, self.x_center = imgui.slider_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
-            changed, self.y_center = imgui.slider_int("Y-axis center", self.y_center, 0, 600)
+            changed, self.x_center = imgui.input_int("X-axis center", self.x_center, 1, 800)  # imgui.core.slider_int, set max to window size
+            changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 1, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
             self.circle = Circle(self.x_center, self.y_center, self.vrad,
                                  color=Color(self.color[0], self.color[1], self.color[2]))
@@ -216,8 +221,8 @@ class Application:
             # changed, self.vrad = imgui.slider_int("", self.vrad, 0, 1000)
             changed, self.hrad = imgui.input_int("Horizontal Radius", self.hrad, 1, 100)
             # changed, self.hrad = imgui.slider_int("Horizontal Radius", self.hrad, 0, 1000)
-            changed, self.x_center = imgui.slider_int("X-axis center", self.x_center, 0, 800)  # imgui.core.slider_int, set max to window size
-            changed, self.y_center = imgui.slider_int("Y-axis center", self.y_center, 0, 600)
+            changed, self.x_center = imgui.input_int("X-axis center", self.x_center, 1, 800)  # imgui.core.slider_int, set max to window size
+            changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 1, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
             self.ellipse = Ellipse(self.x_center, self.y_center,
                                    self.vrad, self.hrad, color=Color(self.color[0], self.color[1], self.color[2]))
@@ -239,11 +244,39 @@ class Application:
         else:
             imgui.text("Nothing Selected")
         imgui.end_child()
+        if imgui.button("Reset", 100, 20):
+            self.color = [.0, .0, .0]
+            self.drawMode = ""
+            self.vrad = 0
+            self.hrad = 0
+            self.x_center = 400
+            self.y_center = 300
+        imgui.same_line(115)
+        if imgui.button("Enter", 100, 20):
+            if self.drawMode == "":
+                pass
+            elif self.drawMode == "c":
+                tempCircle = Circle(self.x_center, self.y_center, self.vrad)
+                tempCircle.set_color(Color(self.color[0], self.color[1], self.color[2]))  # not working yet
+                self.canvas.add_object(tempCircle)
+            elif self.drawMode == "e":
+                tempEllipse = Ellipse(self.x_center, self.y_center, self.vrad, self.hrad)
+                tempEllipse.set_color(Color(self.color[0], self.color[1], self.color[2]))
+                self.canvas.add_object(tempEllipse)
+
         imgui.end()
 
     def layers(self):
+        index = 0
         imgui.begin("Layers")
-        # display layers here...
+        delete_index = -1
+        changed, delete_index = imgui.input_int("Layer to delete", delete_index, 1, 100)
+        if imgui.button("Delete", 100, 20):
+            self.canvas.delete_object(delete_index)
+        for layer in self.canvas.layers:
+            layer_str = "Layer: {}, type: {}"
+            imgui.text(layer_str.format(index + 1, layer.type))
+            index = index + 1
         imgui.end()
 
 
