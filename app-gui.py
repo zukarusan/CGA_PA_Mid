@@ -14,8 +14,8 @@ from cga_lib import *
 class Application:
     # ----Initializations----
     window = pyglet.window.Window(800, 600)  # window initialization
+    # window.set_mouse_visible(False)  # Hides OS pointer when in window
     canvas = Canvas()  # canvas initialization, area that vectors are drawn
-    # glClear(GL_COLOR_BUFFER_BIT)  # clear window using PyOpenGL, alternatively use window.clear()
     imgui.create_context()
     renderer = PygletRenderer(window)
     impl = PygletRenderer(window)
@@ -32,8 +32,41 @@ class Application:
             imgui.render()
             self.impl.render(imgui.get_draw_data())
 
-        # ----Input Handling----
+        # ----Input Handling----  Note: Boolean values are defined below (Drawing/Rendering Variables)
+        # --Keyboard--
+        @self.window.event
+        def on_key_press(symbol, modifiers):
+            if modifiers & key.MOD_SHIFT:  # Example of how to use modifiers
+                if symbol == key.X:
+                    print("test")
+            elif symbol == key.L:
+                if self.showLayers:
+                    self.showLayers = False
+                else:
+                    self.showLayers = True
+            elif symbol == key.D:
+                if self.showDrawTools:
+                    self.showDrawTools = False
+                else:
+                    self.showDrawTools = True
 
+        # --Mouse Movement--  Note: Cursor position variables declared below (Drawing/Rendering Variables)
+        @self.window.event
+        def on_mouse_motion(x, y, dx, dy):
+            print(x, y)
+            self.crosshair(x, y)
+            self.cursor_pos_y = y
+            self.cursor_pos_x = x
+
+        # --Mouse Click--
+        @self.window.event
+        def on_mouse_press(x, y, button, modifiers):
+            pass
+
+        # --Mouse Drag--
+        @self.window.event
+        def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
+            pass
         # ----Input Handling----
 
     def clear(self):
@@ -47,16 +80,15 @@ class Application:
         self.impl.shutdown()
 
     def crosshair(self, x, y):  # draws a green crosshair on pointer location
-        for xc in range(x-5, x+5):
-            pyglet.graphics.draw(
-                1, pyglet.gl.GL_POINTS,
+        for xc in range(x - 5, x + 5):
+            draw(
+                1, GL_POINTS,
                 ('v2i', (xc, y)),
                 ('c3f', (0.0, 1.0, 0.0))
             )
-
-        for yc in range(y-5, y+5):
-            pyglet.graphics.draw(
-                1, pyglet.gl.GL_POINTS,
+        for yc in range(y - 5, y + 5):
+            draw(
+                1, GL_POINTS,
                 ('v2i', (x, yc)),
                 ('c3f', (0.0, 1.0, 0.0))
             )
@@ -129,10 +161,12 @@ class Application:
             imgui.end_main_menu_bar()
 
         imgui.end_frame()
-            # ----Imgui Menu Bar Rendering----
+        # ----Imgui Menu Bar Rendering----
 
     # ----Drawing/Rendering Variables----
-    drawMode = ""  # used to specify what to draw
+    cursor_pos_x = 0
+    cursor_pos_y = 0
+    draw_mode = ""  # used to specify what to draw
     color = [0., 0., 0.]  # color values in float, rgb
     vrad = 0  # store vertical radius for ellipse, radius for circle
     hrad = 0  # stores horizontal radius for ellipse, unused for circle
@@ -159,17 +193,16 @@ class Application:
     def drawTools(self):
         imgui.begin("Drawing Tools")
         if imgui.button("Circle", 100, 20):  # imgui.core.button, https://github.com/ocornut/imgui/issues/2481
-            self.drawMode = 'c'
+            self.draw_mode = 'c'
         imgui.same_line(115)
         if imgui.button("Ellipse", 100, 20):
-            self.drawMode = 'e'
-        imgui.new_line()
-        if self.drawMode == 'c':
+            self.draw_mode = 'e'
+        if self.draw_mode == 'c':
             changed, self.vrad = imgui.input_int("Radius", self.vrad, 1, 100)  # imgui.core.input_int
             changed, self.x_center = imgui.input_int("X-axis center", self.x_center, 1, 800)  # imgui.core.slider_int, set max to window size
             changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 1, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
-        elif self.drawMode == 'e':
+        elif self.draw_mode == 'e':
             changed, self.vrad = imgui.input_int("Vertical Radius", self.vrad, 1, 100)  # imgui.core.input_int
             # changed, self.vrad = imgui.slider_int("", self.vrad, 0, 1000)
             changed, self.hrad = imgui.input_int("Horizontal Radius", self.hrad, 1, 100)
@@ -180,12 +213,12 @@ class Application:
         imgui.new_line()
         imgui.begin_child("Current Settings", border=True)  # imgui.core.begin_child
         imgui.text("Currently Drawing: ")  # imgui.core.text
-        if self.drawMode == "c":
+        if self.draw_mode == "c":
             imgui.same_line(200), imgui.text_colored("Circle", 0, 1, 0)  # imgui.core.same_line, imgui.core.text_colored
             imgui.text("Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
             imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
             imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
-        elif self.drawMode == "e":
+        elif self.draw_mode == "e":
             imgui.same_line(200), imgui.text_colored("Ellipse", 0, 1, 0)
             imgui.text("V. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
             imgui.text("H. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.hrad), 0, 1, 0)
@@ -196,19 +229,19 @@ class Application:
         imgui.end_child()
         if imgui.button("Reset", 100, 20):
             self.color = [.0, .0, .0]
-            self.drawMode = ""
+            self.draw_mode = ""
             self.vrad = 0
             self.hrad = 0
             self.x_center = 400
             self.y_center = 300
         imgui.same_line(115)
         if imgui.button("Enter", 100, 20):
-            if self.drawMode == "":
+            if self.draw_mode == "":
                 pass
-            elif self.drawMode == "c":
+            elif self.draw_mode == "c":
                 drawCircle = Circle(self.x_center, self.y_center, self.vrad, color=Color(self.color[0], self.color[1], self.color[2]))
                 self.canvas.add_object(drawCircle)
-            elif self.drawMode == "e":
+            elif self.draw_mode == "e":
                 drawEllipse = Ellipse(self.x_center, self.y_center, self.vrad, self.hrad, color=Color(self.color[0], self.color[1], self.color[2]))
                 self.canvas.add_object(drawEllipse)
         imgui.end()
@@ -217,7 +250,7 @@ class Application:
         index = 0
         imgui.begin("Layers")
         delete_index = -1
-        if imgui.button("Delete All"):
+        if imgui.button("Delete All", 176, 20):
             delete_index = self.canvas.get_length() - 1
             try:
                 while delete_index >= 0:
@@ -225,6 +258,9 @@ class Application:
                     delete_index = delete_index - 1
             except delete_index == -1:
                 print("No objects found!")
+        if imgui.button("Refresh Screen", 176, 20):
+            self.window.clear()
+            self.canvas.draw_layers()
         changed, delete_index = imgui.input_int("Layer to delete", delete_index, 1, 100)
         if imgui.button("Delete", 100, 20):
             self.canvas.delete_object(delete_index)
