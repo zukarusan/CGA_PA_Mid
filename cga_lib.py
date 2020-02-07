@@ -19,6 +19,9 @@ class Canvas:
     def __init__(self):
         self.layers = []  # Create layers upon instantiation
 
+    def get_length(self):
+        return len(self.layers)
+
     def add_object(self, drawable_object):
         drawable_object.set_layer_id(len(self.layers))  # Set id to track in later use
         self.layers.append(drawable_object)  # Adding the 2D shape object into the last of the layer list
@@ -50,7 +53,7 @@ class DrawableObject:
 
     def __init__(self, color=Color(1.0, 1.0, 1.0)):
         self.id = None  # ID for layer in canvas
-        self.type = "object"  # Type of object (circle/ellipse)
+        self.type = None  # Type of object (circle/ellipse)
         self.colors = []  # Color buffers created to be specified when drawing
         self.points = []  # Point buffers created to be drawn in canvas
         self.buffer_size = None  # Number of buffers
@@ -75,7 +78,7 @@ class DrawableObject:
 
 class Circle(DrawableObject):
     def __init__(self, x_center, y_center, radius, **kwargs):
-        self.type = "circle"  # doesn't seem to be working
+        type = "circle"  # doesn't seem to be working
         self.radius = radius
         self.x_center = x_center
         self.y_center = y_center
@@ -129,7 +132,7 @@ class Circle(DrawableObject):
 
 class Ellipse(DrawableObject):
     def __init__(self, x_center, y_center, v_radius, h_radius, **kwargs):
-        self.type = "ellipse"
+        type = "ellipse"
         self.v_radius = v_radius
         self.h_radius = h_radius
         self.x_center = x_center
