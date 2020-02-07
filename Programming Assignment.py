@@ -28,6 +28,12 @@ def on_key_press(symbol, modifiers):  # keyboard input handler
         window.clear()
         canvas.delete_object(len(canvas.layers)-1)
 
+    elif symbol == key.T and modifiers == key.MOD_CTRL:  # Modifier test
+        print("test-ctrl+t")
+
+    elif symbol == key.T:
+       print('test-t')
+
     elif symbol == key.C:  # circle
         print("Adding Circle Object at (400, 300) with radius = 25")
         # circle(25, 400, 300)
