@@ -38,11 +38,12 @@ class Canvas:
     def delete_object(self, id):  # Delete for the specified ID of the layer list
         try:
             self.layers.remove(self.layers[id])
-        except:
+        except Exception:
             if id == -1:
                 print("layer is empty")
             else:
                 print("Object with id ", id, " doesn't exist in the layer list")
+                print(Exception)
 
 
 class DrawableObject:

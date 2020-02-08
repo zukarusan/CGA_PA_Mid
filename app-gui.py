@@ -5,6 +5,7 @@ from pyglet import gl
 from pyglet.gl import *
 from pyglet.window import key  # for key input, on_key_press
 
+import pickle
 import imgui
 from imgui.integrations.pyglet import PygletRenderer
 
@@ -124,6 +125,13 @@ class Application:
                 if clicked_quit:  # event: if entry quit is clicked
                     exit(1)
                 if selected_quit:
+                    pass
+                clicked_save, selected_save = imgui.menu_item(
+                    "Save", 'Cmd+S', False, True
+                )
+                if clicked_save:
+                    self.save('save1', './')
+                if selected_save:
                     pass
                 imgui.end_menu()  # end File menu
 
@@ -246,30 +254,40 @@ class Application:
                 self.canvas.add_object(drawEllipse)
         imgui.end()
 
+    delete_index = 1
     def layers(self):
-        index = 0
         imgui.begin("Layers")
-        delete_index = -1
-        if imgui.button("Delete All", 176, 20):
-            delete_index = self.canvas.get_length() - 1
+        if imgui.button("Delete All"):
+            clear_index = self.canvas.get_length() - 1
             try:
-                while delete_index >= 0:
-                    self.canvas.delete_object(delete_index)
-                    delete_index = delete_index - 1
-            except delete_index == -1:
+                while clear_index >= 0:
+                    self.canvas.delete_object(clear_index)
+                    clear_index = clear_index - 1
+            except clear_index == -1:
                 print("No objects found!")
         if imgui.button("Refresh Screen", 176, 20):
             self.window.clear()
             self.canvas.draw_layers()
-        changed, delete_index = imgui.input_int("Layer to delete", delete_index, 1, 100)
+        changed, self.delete_index = imgui.input_int("Layer to delete", self.delete_index, 1, 100)
         if imgui.button("Delete", 100, 20):
-            self.canvas.delete_object(delete_index)
+            self.canvas.delete_object(self.delete_index-1)
+        index = 0
         for layer in self.canvas.layers:
             layer_str = "Layer: {}, type: {}"
             imgui.text(layer_str.format(index + 1, layer.type))
             index = index + 1
         imgui.end()
 
+    def save(self, file_name, path):
+        try:
+            with open(path + file_name + '.can', 'wb') as output:
+                pickle.dump(self.canvas, output, pickle.HIGHEST_PROTOCOL)
+        except FileNotFoundError:
+            pass
+
+    def load(self, file_name, path):
+        with open(path + file_name + '.can', 'rb') as input:
+            pass
 
 def main():
     app = Application()
