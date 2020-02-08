@@ -255,6 +255,7 @@ class Application:
         imgui.end()
 
     delete_index = 1
+
     def layers(self):
         imgui.begin("Layers")
         if imgui.button("Delete All"):
@@ -285,9 +286,12 @@ class Application:
         except FileNotFoundError:
             pass
 
-    def load(self, file_name, path):
-        with open(path + file_name + '.can', 'rb') as input:
-            pass
+    def load(self, path, file_name):
+        try:
+            with open(path + file_name + '.can', 'rb') as input:
+                self.canvas = pickle.load(input)
+        except FileNotFoundError:
+            pass  # Please make a file nor found error dialog
 
 def main():
     app = Application()
