@@ -52,9 +52,9 @@ class DrawableObject:
     It is aimed to create object to be drawn in the canvas manner.
     """
 
-    def __init__(self, color=Color(1.0, 1.0, 1.0)):
+    def __init__(self, color=Color(1.0, 1.0, 1.0), type=None):
         self.id = None  # ID for layer in canvas
-        self.type = None  # Type of object (circle/ellipse)
+        self.type = type  # Type of object (circle/ellipse)
         self.colors = []  # Color buffers created to be specified when drawing
         self.points = []  # Point buffers created to be drawn in canvas
         self.buffer_size = None  # Number of buffers
@@ -79,11 +79,10 @@ class DrawableObject:
 
 class Circle(DrawableObject):
     def __init__(self, x_center, y_center, radius, **kwargs):
-        type = "circle"  # doesn't seem to be working
         self.radius = radius
         self.x_center = x_center
         self.y_center = y_center
-        super().__init__(**kwargs)
+        super().__init__(type="Circle", **kwargs)
 
     def create_buffer(self):
         # Drawing circle using Second-Order Midpoint Algorithm
@@ -133,12 +132,11 @@ class Circle(DrawableObject):
 
 class Ellipse(DrawableObject):
     def __init__(self, x_center, y_center, v_radius, h_radius, **kwargs):
-        type = "ellipse"
         self.v_radius = v_radius
         self.h_radius = h_radius
         self.x_center = x_center
         self.y_center = y_center
-        super().__init__(**kwargs)
+        super().__init__(type="Ellipse", **kwargs)
 
     def create_buffer(self):
         x = 0
