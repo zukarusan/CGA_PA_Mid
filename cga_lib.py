@@ -91,7 +91,7 @@ class Circle(DrawableObject):
         d = 1 - self.radius
         d_cont = 3
         d_shift = (-2 * self.radius) + 5
-        while x < y:
+        while x <= y:
             # quadrant 1
             # (x, y)
             self.points += [self.x_center + x, self.y_center + y]
