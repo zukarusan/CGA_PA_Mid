@@ -130,7 +130,7 @@ class Application:
                     "Save", 'Cmd+S', False, True
                 )
                 if clicked_save:
-                    self.save('save1', './')
+                    self.save('./', 'save')
                 if selected_save:
                     pass
                 imgui.end_menu()  # end File menu
@@ -278,7 +278,7 @@ class Application:
             index = index + 1
         imgui.end()
 
-    def save(self, file_name, path):
+    def save(self, path, file_name):
         try:
             with open(path + file_name + '.can', 'wb') as output:
                 pickle.dump(self.canvas, output, pickle.HIGHEST_PROTOCOL)
