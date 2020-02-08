@@ -1,5 +1,8 @@
 from __future__ import absolute_import
 
+import  tkinter as tk
+from tkinter import filedialog
+
 import pyglet
 from pyglet import gl
 from pyglet.gl import *
@@ -130,14 +133,24 @@ class Application:
                     "Save", 'Cmd+S', False, True
                 )
                 if clicked_save:
-                    self.save('./', 'save') # Buatin dialog window browse file tolong
+                    dialog_root = tk.Tk()
+                    dialog_root.withdraw()
+                    self.save(filedialog.asksaveasfilename(
+                        initialdir="./", parent=None, title="Save as a CGA canvas file",
+                        filetypes=[('CGA Canvas File', 'can')]
+                    ))
                 if selected_save:
                     pass
                 clicked_load, selected_load = imgui.menu_item(
                     "Load", 'Cmd+L', False, True
                 )
                 if clicked_load:
-                    self.load('./', 'save') # Buatin dialog window browse file juga tolong
+                    dialog_root = tk.Tk()
+                    dialog_root.withdraw()
+                    self.load(filedialog.askopenfilename(
+                        initialdir="./", parent=None, title="Load a CGA canvas file",
+                        filetypes=[('CGA Canvas File', '.can')], multiple=False
+                    ))
                 if selected_load:
                     pass
                 imgui.end_menu()  # end File menu
@@ -286,16 +299,20 @@ class Application:
             index = index + 1
         imgui.end()
 
-    def save(self, path, file_name):
+    def save(self, path, file_name=""):
+        if not file_name == "":
+            file_name += '.can'
         try:
-            with open(path + file_name + '.can', 'wb') as output:
+            with open(path + file_name, 'wb') as output:
                 pickle.dump(self.canvas, output, pickle.HIGHEST_PROTOCOL)
         except FileNotFoundError:
             pass
 
-    def load(self, path, file_name):
+    def load(self, path, file_name=""):
+        if not file_name == "":
+            file_name += '.can'
         try:
-            with open(path + file_name + '.can', 'rb') as input:
+            with open(path + file_name, 'rb') as input:
                 self.canvas = pickle.load(input)
         except FileNotFoundError:
             pass  # Please make a file nor found error dialog
