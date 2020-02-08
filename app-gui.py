@@ -130,8 +130,15 @@ class Application:
                     "Save", 'Cmd+S', False, True
                 )
                 if clicked_save:
-                    self.save('./', 'save')
+                    self.save('./', 'save') # Buatin dialog window browse file tolong
                 if selected_save:
+                    pass
+                clicked_load, selected_load = imgui.menu_item(
+                    "Load", 'Cmd+L', False, True
+                )
+                if clicked_load:
+                    self.load('./', 'save') # Buatin dialog window browse file juga tolong
+                if selected_load:
                     pass
                 imgui.end_menu()  # end File menu
 
