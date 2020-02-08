@@ -1,5 +1,8 @@
 from __future__ import absolute_import
 
+import tkinter as tk
+from tkinter import  filedialog
+
 import pyglet
 from pyglet import gl
 from pyglet.gl import *
@@ -40,17 +43,16 @@ class Application:
             if modifiers & key.MOD_SHIFT:  # Example of how to use modifiers
                 if symbol == key.X:
                     print("test")
-            elif modifiers & key.MOD_CTRL:
-                if symbol == key.L:
-                    if self.showLayers:
-                        self.showLayers = False
-                    else:
-                        self.showLayers = True
-                elif symbol == key.D:
-                    if self.showDrawTools:
-                        self.showDrawTools = False
-                    else:
-                        self.showDrawTools = True
+            elif symbol == key.L:
+                if self.showLayers:
+                    self.showLayers = False
+                else:
+                    self.showLayers = True
+            elif symbol == key.D:
+                if self.showDrawTools:
+                    self.showDrawTools = False
+                else:
+                    self.showDrawTools = True
 
         # --Mouse Movement--  Note: Cursor position variables declared below (Drawing/Rendering Variables)
         @self.window.event
@@ -98,8 +100,6 @@ class Application:
     # ----Window and Toolbar Booleans----
     showDrawTools = False
     showLayers = False
-    showSaveWindow = False
-    showLoadWindow = False
     showTests = False
     # ----Window and Toolbar Booleans----
 
@@ -116,12 +116,6 @@ class Application:
 
         if self.showLayers:  # show Layers Window
             self.layers()
-
-        if self.showSaveWindow:
-            self.saveWindow()
-
-        if self.showLoadWindow:
-            self.loadWindow()
         # ----Call Windows----
 
         # ----Imgui Menu Bar Rendering----
@@ -129,37 +123,41 @@ class Application:
 
             if imgui.begin_menu("File", True):  # start menu bar entry: File
                 clicked_quit, selected_quit = imgui.menu_item(  # start File menu entry: Quit
-                    "Quit", 'Esc', False, True  # Name label, Shortcut label, Check bool, Enabled bool
+                    "Quit", 'Cmd+Q', False, True  # Name label, Shortcut label, Check bool, Enabled bool
                 )
                 if clicked_quit:  # event: if entry quit is clicked
                     exit(1)
                 if selected_quit:
                     pass
                 clicked_save, selected_save = imgui.menu_item(
-                    "Save", 'Ctrl+S', False, True
+                    "Save", 'Cmd+S', False, True
                 )
                 if clicked_save:
-                    if self.showSaveWindow:
-                        self.showSaveWindow = False
-                    else:
-                        self.showSaveWindow = True
+                    dialog_root = tk.Tk()
+                    dialog_root.withdraw()
+                    self.save(filedialog.asksaveasfilename(
+                        initialdir="./", parent=None, title='Save as a CGA canvas file',
+                        filetypes=[('CGA Canvas File', '.can')]
+                    ))
                 if selected_save:
                     pass
                 clicked_load, selected_load = imgui.menu_item(
-                    "Load", 'Shift+L', False, True
+                    "Load", 'Cmd+L', False, True
                 )
                 if clicked_load:
-                    if self.showLoadWindow:
-                        self.showLoadWindow = False
-                    else:
-                        self.showLoadWindow = True
+                    dialog_root = tk.Tk()
+                    dialog_root.withdraw()
+                    self.load(filedialog.askopenfilename(
+                        initialdir="./", parent=None, title='Load a CGA canvas file',
+                        filetypes=[('CGA Canvas File', '.can')], multiple=False
+                    ))
                 if selected_load:
                     pass
                 imgui.end_menu()  # end File menu
 
             if imgui.begin_menu("Draw", True):
                 clicked_draw, selected_draw = imgui.menu_item(
-                    "Draw Tools", "Ctrl+D", self.showDrawTools, True
+                    "Draw Tools", "", self.showDrawTools, True
                 )
                 if clicked_draw:
                     if self.showDrawTools:
@@ -168,7 +166,7 @@ class Application:
                         self.showDrawTools = True
 
                 clicked_layers, selected_layers = imgui.menu_item(
-                    "Layers", "Ctrl+Shift+L", self.showLayers, True
+                    "Layers", "", self.showLayers, True
                 )
                 if clicked_layers:
                     if self.showLayers:
@@ -222,22 +220,6 @@ class Application:
 
     def drawTools(self):
         imgui.begin("Drawing Tools")
-        imgui.begin_child("Current Settings", 200, 150, border=True)  # imgui.core.begin_child
-        imgui.text("Currently Drawing: ")  # imgui.core.text
-        if self.draw_mode == "c":
-            imgui.same_line(200), imgui.text_colored("Circle", 0, 1, 0)  # imgui.core.same_line, imgui.core.text_colored
-            imgui.text("Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
-            imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
-            imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
-        elif self.draw_mode == "e":
-            imgui.same_line(200), imgui.text_colored("Ellipse", 0, 1, 0)
-            imgui.text("V. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
-            imgui.text("H. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.hrad), 0, 1, 0)
-            imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
-            imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
-        else:
-            imgui.text("Nothing Selected")
-        imgui.end_child()
         if imgui.button("Circle", 100, 20):  # imgui.core.button, https://github.com/ocornut/imgui/issues/2481
             self.draw_mode = 'c'
         imgui.same_line(115)
@@ -257,7 +239,22 @@ class Application:
             changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 1, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
         imgui.new_line()
-
+        imgui.begin_child("Current Settings", border=True)  # imgui.core.begin_child
+        imgui.text("Currently Drawing: ")  # imgui.core.text
+        if self.draw_mode == "c":
+            imgui.same_line(200), imgui.text_colored("Circle", 0, 1, 0)  # imgui.core.same_line, imgui.core.text_colored
+            imgui.text("Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
+            imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
+            imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
+        elif self.draw_mode == "e":
+            imgui.same_line(200), imgui.text_colored("Ellipse", 0, 1, 0)
+            imgui.text("V. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
+            imgui.text("H. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.hrad), 0, 1, 0)
+            imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
+            imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
+        else:
+            imgui.text("Nothing Selected")
+        imgui.end_child()
         if imgui.button("Reset", 100, 20):
             self.color = [.0, .0, .0]
             self.draw_mode = ""
@@ -281,7 +278,7 @@ class Application:
 
     def layers(self):
         imgui.begin("Layers")
-        if imgui.button("Delete All", 150, 20):
+        if imgui.button("Delete All"):
             clear_index = self.canvas.get_length() - 1
             try:
                 while clear_index >= 0:
@@ -289,84 +286,36 @@ class Application:
                     clear_index = clear_index - 1
             except clear_index == -1:
                 print("No objects found!")
-        if imgui.button("Refresh Screen", 150, 20):
+        if imgui.button("Refresh Screen", 176, 20):
             self.window.clear()
             self.canvas.draw_layers()
-        imgui.push_item_width(150)  # Manages next item's width
         changed, self.delete_index = imgui.input_int("Layer to delete", self.delete_index, 1, 100)
-        imgui.pop_item_width()  # Close push_item_width
-        if imgui.button("Delete", 150, 20):
+        if imgui.button("Delete", 100, 20):
             self.canvas.delete_object(self.delete_index-1)
         index = 0
-        imgui.begin_child("layers", 200, 150, border=True)
-        imgui.text("Layers:")
         for layer in self.canvas.layers:
             layer_str = "Layer: {}, type: {}"
             imgui.text(layer_str.format(index + 1, layer.type))
             index = index + 1
-        imgui.end_child()
         imgui.end()
 
-    # ----Save/Load Variables----
-    file_name = "Canvas"
-    file_save_path = "./"
-    file_load_path = "./"
-    # ----Save/Load Variables----
-
-    def saveWindow(self):
-        imgui.begin("Save Current Canvas")
-        imgui.push_item_width(150)  # Manages next item's width
-        changed, self.file_save_path = imgui.input_text("Specify path of file to save", self.file_save_path, 256)
-        imgui.pop_item_width()  # Close push_item_width
-        imgui.push_item_width(150)  # Manages next item's width
-        changed, self.file_name = imgui.input_text("Specify file name", self.file_name, 256)
-        imgui.pop_item_width()  # Close push_item_width
-        if imgui.button("Save Canvas", 150, 20):
-            self.save(self.file_name, self.file_save_path)
-        if imgui.button("Cancel", 150, 20):
-            self.showLoadWindow = False
-        imgui.end()
-
-    def errorWindow(self, io_error):  # io_error specified at function call
-        imgui.begin("File Handling Error!", True)
-        if io_error == "LPathError":
-            imgui.text("Error! Canvas file does not exist at specified path.")
-        elif io_error == "SPathError":
-            imgui.text("Error! Could not save canvas file, check specified path.")
-        elif io_error == "":
-            imgui.text("No error occurred, why did you call me? Either there is a false positive or the program is a buggy piece of shit.")
-        else:
-            imgui.text("Unknown error occurred, this program is a buggy piece of shit.")
-        imgui.end()
-
-    def loadWindow(self):
-        imgui.begin("Load Canvas")
-        imgui.push_item_width(150)  # Manages next item's width
-        changed, self.file_load_path = imgui.input_text("Specify path of file to load", self.file_load_path, 256)
-        imgui.pop_item_width()  # Close push_item_width
-        imgui.push_item_width(150)  # Manages next item's width
-        changed, self.file_name = imgui.input_text("Specify file name", self.file_name, 256)
-        imgui.pop_item_width()  # Close push_item_width
-        if imgui.button("Load Canvas", 150, 20):
-            self.load(self.file_load_path, self.file_load_path)
-        if imgui.button("Cancel", 150, 20):
-            self.showLoadWindow = False
-        imgui.end()
-
-    def save(self, file_name, path):
+    def save(self, path, file_name=""):
+        if not file_name == "":
+            file_name += '.can'
         try:
-            with open(path + file_name + '.can', 'wb') as output:
+            with open(path + file_name, 'wb') as output:
                 pickle.dump(self.canvas, output, pickle.HIGHEST_PROTOCOL)
         except FileNotFoundError:
-            self.errorWindow("SPathError")
+            pass
 
-    def load(self, path, file_name):
+    def load(self, path, file_name=""):
+        if not file_name == "":
+            file_name += '.can'
         try:
-            with open(path + file_name + '.can', 'rb') as input:
+            with open(path + file_name, 'rb') as input:
                 self.canvas = pickle.load(input)
         except FileNotFoundError:
-            self.errorWindow("LPathError")
-
+            pass  # Please make a file nor found error dialog
 
 def main():
     app = Application()
