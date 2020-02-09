@@ -23,6 +23,7 @@ class Application:
     imgui.create_context()
     renderer = PygletRenderer(window)
     impl = PygletRenderer(window)
+    cross = [0, 0]
     # ----Initializations----
 
     def __init__(self):
@@ -57,7 +58,8 @@ class Application:
         @self.window.event
         def on_mouse_motion(x, y, dx, dy):
             # print(x, y)
-            self.crosshair(x, y)
+            self.cursor_x_pos = x
+            self.cursor_y_pos = y
 
         # --Mouse Click--
         @self.window.event
@@ -107,6 +109,8 @@ class Application:
         # --Mouse Drag--
         @self.window.event
         def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
+            self.cursor_x_pos = x
+            self.cursor_y_pos = y
             if modifiers & key.MOD_CTRL:
                 print(x, y, dx, dy)
             '''
@@ -137,7 +141,7 @@ class Application:
             draw(
                 1, GL_POINTS,
                 ('v2i', (xpoints, y)),
-                ('c3f', (0.0, 1.0, 0.0))
+                ('c3f', (1.0, 0.2, 0.2))
             )
             xpoints = xpoints + 1
         ypoints = y - 5
@@ -146,7 +150,7 @@ class Application:
             draw(
                 1, GL_POINTS,
                 ('v2i', (x, ypoints)),
-                ('c3f', (0.0, 1.0, 0.0))
+                ('c3f', (1.0, 0.2, 0.2))
             )
             ypoints = ypoints + 1
 
@@ -175,7 +179,7 @@ class Application:
     def update(self, dt):
         self.canvas.draw_layers()
         imgui.new_frame()
-        self.midCrosshair()
+        self.crosshair(self.cursor_x_pos, self.cursor_y_pos)
 
         # ----Call Windows----
         if self.showTests:  # show Tests
@@ -288,7 +292,7 @@ class Application:
     def tests(self):
         imgui.begin("Test Window")
         imgui.text("Lorem ipsum")
-        changed, checkbox = imgui.checkbox("Checkbox", self.checkbox)  # imgui.core.checkbox
+        changed, self.checkbox = imgui.checkbox("Checkbox", self.checkbox)  # imgui.core.checkbox
         if imgui.button("Test Circle", 100, 20):
             self.canvas.add_object(self.testCircle)
         if imgui.button("Test Ellipse", 100, 20):
@@ -387,7 +391,14 @@ class Application:
             self.canvas.add_object(drawEllipse)
         else:
             pass
-
+        # --Refresh Mouse Draw Variables--
+        self.mouse_draw = False  # Checks whether modifier is kept held down during drag
+        self.start_x_pos = 0  # Click position
+        self.start_y_pos = 0
+        self.end_x_pos = 0  # Release position
+        self.end_y_pos = 0
+        self.cursor_x_pos = 0  # Current cursor position
+        self.cursor_y_pos = 0
 
     def save(self, path, file_name=""):
         if not file_name == "":
