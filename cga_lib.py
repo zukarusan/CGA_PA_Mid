@@ -68,6 +68,10 @@ class DrawableObject:
     def set_layer_id(self, id):  # Function to set the id in canvas layers
         self.id = id
 
+    def move_to(self, x, y):
+        self.points.clear()
+        self.create_buffer()
+
     def set_color(self, color):
         if not self.buffer_size == 0:
             self.colors.clear()
@@ -85,6 +89,11 @@ class Circle(DrawableObject):
         self.x_center = x_center
         self.y_center = y_center
         super().__init__(type="Circle", **kwargs)
+
+    def move_to(self, x, y):
+        self.x_center = x
+        self.y_center = y
+        super().move_to(x, y)
 
     def create_buffer(self):
         # Drawing circle using Second-Order Midpoint Algorithm
@@ -139,6 +148,11 @@ class Ellipse(DrawableObject):
         self.x_center = x_center
         self.y_center = y_center
         super().__init__(type="Ellipse", **kwargs)
+
+    def move_to(self, x, y):
+        self.x_center = x
+        self.y_center = y
+        super().move_to(x, y)
 
     def create_buffer(self):
         x = 0
