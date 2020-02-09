@@ -52,9 +52,10 @@ class DrawableObject:
     It is aimed to create object to be drawn in the canvas manner.
     """
 
-    def __init__(self, color=Color(1.0, 1.0, 1.0), type=None):
+    def __init__(self, width=1, color=Color(1.0, 1.0, 1.0), type=None):
         self.id = None  # ID for layer in canvas
         self.type = type  # Type of object (circle/ellipse)
+        self.width = width  # Set width pixel of an object, default is 1 px
         self.colors = []  # Color buffers created to be specified when drawing
         self.points = []  # Point buffers created to be drawn in canvas
         self.buffer_size = None  # Number of buffers
@@ -69,6 +70,7 @@ class DrawableObject:
 
     def set_color(self, color):
         if not self.buffer_size == 0:
+            self.colors.clear()
             for b in range(self.buffer_size):
                 self.colors += [color.red]
                 self.colors += [color.green]
