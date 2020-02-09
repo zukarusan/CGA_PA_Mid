@@ -35,14 +35,6 @@ class Application:
             imgui.render()
             self.impl.render(imgui.get_draw_data())
 
-            # --Mouse Movement--  Note: Cursor position variables declared below (Drawing/Rendering Variables)
-            @self.window.event
-            def on_mouse_motion(x, y, dx, dy):
-                #print(x, y)
-                self.crosshair(x, y)
-                #self.cursor_pos_y = y
-                #self.cursor_pos_x = x
-
         # ----Input Handling----  Note: Boolean values are defined below (Drawing/Rendering Variables)
         # --Keyboard--
         @self.window.event
@@ -61,15 +53,70 @@ class Application:
                 else:
                     self.showDrawTools = True
 
+        # --Mouse Movement--  Note: Cursor position variables declared below (Drawing/Rendering Variables)
+        @self.window.event
+        def on_mouse_motion(x, y, dx, dy):
+            # print(x, y)
+            self.crosshair(x, y)
+
         # --Mouse Click--
         @self.window.event
         def on_mouse_press(x, y, button, modifiers):
-            pass
+            print("mouse press at: ", x, y)
+            if modifiers & key.MOD_SHIFT:
+                self.start_x_pos = x
+                self.start_y_pos = y
+                self.mouse_draw = True
+
+        # --Mouse Release--
+        @self.window.event
+        def on_mouse_release(x, y, button, modifiers):
+            print("mouse release at: ", x, y)
+            if modifiers & key.MOD_SHIFT:
+                self.end_x_pos = x
+                self.end_y_pos = x
+                if self.mouse_draw:
+                    dx = self.start_x_pos - self.end_x_pos
+                    dy = self.start_y_pos - self.end_y_pos
+                    dx = abs(dx)
+                    dy = abs(dy)
+                    self.hrad = round(dx/2)
+                    self.vrad = round(dy/2)
+                    if self.start_x_pos <= self.end_x_pos:
+                        if self.start_y_pos <= self.end_y_pos:
+                            self.x_center = self.start_x_pos + round(dx/2)
+                            self.y_center = self.start_y_pos + round(dy/2)
+                        else:
+                            self.x_center = self.start_x_pos + round(dx / 2)
+                            self.y_center = self.end_y_pos + round(dy / 2)
+                    else:
+                        if self.start_y_pos <= self.end_y_pos:
+                            self.x_center = self.end_x_pos + round(dx/2)
+                            self.y_center = self.start_y_pos + round(dy/2)
+                        else:
+                            self.x_center = self.end_x_pos + round(dx / 2)
+                            self.y_center = self.end_y_pos + round(dy / 2)
+                    if self.draw_mode == "c":
+                        self.vrad = max(self.vrad, self.hrad)
+                self.createObject()
+                self.mouse_draw = False
+            else:
+                if self.mouse_draw:
+                    self.mouse_draw = False
 
         # --Mouse Drag--
         @self.window.event
         def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
+            if modifiers & key.MOD_CTRL:
+                print(x, y, dx, dy)
+            '''
+            if modifiers and key.MOD_SHIFT:
+                if self.draw_mode == "e":
+                    self.vrad = dy
+                    self.hrad = dx
+                    self.x_center = 
             pass
+            '''
         # ----Input Handling----
 
     def clear(self):
@@ -83,7 +130,7 @@ class Application:
         self.impl.shutdown()
 
     def crosshair(self, x, y):  # draws a green crosshair on pointer location
-        print(x, y)
+        # print(x, y)
         xpoints = x - 5
         while xpoints < (x + 5):
         # for xc in range(x - 5, x + 5):
@@ -215,8 +262,15 @@ class Application:
         # ----Imgui Menu Bar Rendering----
 
     # ----Drawing/Rendering Variables----
-    cursor_pos_x = 0
-    cursor_pos_y = 0
+    # --Mouse Draw Variables
+    mouse_draw = False  # Checks whether modifier is kept held down during drag
+    start_x_pos = 0  # Click position
+    start_y_pos = 0
+    end_x_pos = 0  # Release position
+    end_y_pos = 0
+    cursor_x_pos = 0  # Current cursor position
+    cursor_y_pos = 0
+    # --Mouse Draw Variables
     draw_mode = ""  # used to specify what to draw
     color = [0., 0., 0.]  # color values in float, rgb
     vrad = 0  # store vertical radius for ellipse, radius for circle
@@ -321,6 +375,19 @@ class Application:
             imgui.text(layer_str.format(index + 1, layer.type))
             index = index + 1
         imgui.end()
+
+    def createObject(self):
+        if self.draw_mode == "c":
+            drawCircle = Circle(self.x_center, self.y_center, self.vrad,
+                                color=Color(self.color[0], self.color[1], self.color[2]))
+            self.canvas.add_object(drawCircle)
+        elif self.draw_mode == "e":
+            drawEllipse = Ellipse(self.x_center, self.y_center, self.vrad, self.hrad,
+                                  color=Color(self.color[0], self.color[1], self.color[2]))
+            self.canvas.add_object(drawEllipse)
+        else:
+            pass
+
 
     def save(self, path, file_name=""):
         if not file_name == "":
