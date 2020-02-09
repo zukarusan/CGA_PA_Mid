@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import tkinter as tk
-from tkinter import  filedialog
+from tkinter import filedialog
 
 import pyglet
 from pyglet import gl
@@ -31,10 +31,17 @@ class Application:
         @self.window.event
         def on_draw():
             self.window.clear()
-            glClear(GL_COLOR_BUFFER_BIT)
             self.update(1 / 60.0)
             imgui.render()
             self.impl.render(imgui.get_draw_data())
+
+            # --Mouse Movement--  Note: Cursor position variables declared below (Drawing/Rendering Variables)
+            @self.window.event
+            def on_mouse_motion(x, y, dx, dy):
+                #print(x, y)
+                self.crosshair(x, y)
+                #self.cursor_pos_y = y
+                #self.cursor_pos_x = x
 
         # ----Input Handling----  Note: Boolean values are defined below (Drawing/Rendering Variables)
         # --Keyboard--
@@ -53,14 +60,6 @@ class Application:
                     self.showDrawTools = False
                 else:
                     self.showDrawTools = True
-
-        # --Mouse Movement--  Note: Cursor position variables declared below (Drawing/Rendering Variables)
-        @self.window.event
-        def on_mouse_motion(x, y, dx, dy):
-            print(x, y)
-            self.crosshair(x, y)
-            self.cursor_pos_y = y
-            self.cursor_pos_x = x
 
         # --Mouse Click--
         @self.window.event
@@ -84,6 +83,29 @@ class Application:
         self.impl.shutdown()
 
     def crosshair(self, x, y):  # draws a green crosshair on pointer location
+        print(x, y)
+        xpoints = x - 5
+        while xpoints < (x + 5):
+        # for xc in range(x - 5, x + 5):
+            draw(
+                1, GL_POINTS,
+                ('v2i', (xpoints, y)),
+                ('c3f', (0.0, 1.0, 0.0))
+            )
+            xpoints = xpoints + 1
+        ypoints = y - 5
+        while ypoints < (y + 5):
+        # for yc in range(y - 5, y + 5):
+            draw(
+                1, GL_POINTS,
+                ('v2i', (x, ypoints)),
+                ('c3f', (0.0, 1.0, 0.0))
+            )
+            ypoints = ypoints + 1
+
+    def midCrosshair(self):
+        x = 400
+        y = 300
         for xc in range(x - 5, x + 5):
             draw(
                 1, GL_POINTS,
@@ -106,6 +128,7 @@ class Application:
     def update(self, dt):
         self.canvas.draw_layers()
         imgui.new_frame()
+        self.midCrosshair()
 
         # ----Call Windows----
         if self.showTests:  # show Tests
@@ -301,7 +324,7 @@ class Application:
 
     def save(self, path, file_name=""):
         if not file_name == "":
-            file_name += '.can'
+            file_name += ('.can',)
         try:
             with open(path + file_name, 'wb') as output:
                 pickle.dump(self.canvas, output, pickle.HIGHEST_PROTOCOL)
@@ -310,7 +333,7 @@ class Application:
 
     def load(self, path, file_name=""):
         if not file_name == "":
-            file_name += '.can'
+            file_name += ('.can',)
         try:
             with open(path + file_name, 'rb') as input:
                 self.canvas = pickle.load(input)
