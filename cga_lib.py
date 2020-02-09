@@ -65,10 +65,13 @@ class DrawableObject:
     def create_buffer(self):  # Drawing function by creating the points and color buffers instead and later
         pass                  # to be drawn in canvas. Specified in each derived class.
 
+    def move_to(self, x, y):  # Move object to specific center point
+        pass
+
     def set_layer_id(self, id):  # Function to set the id in canvas layers
         self.id = id
 
-    def move_to(self, x, y):
+    def recreate(self):
         self.points.clear()
         self.create_buffer()
 
@@ -90,10 +93,14 @@ class Circle(DrawableObject):
         self.y_center = y_center
         super().__init__(type="Circle", **kwargs)
 
+    def change_radius(self, rad):
+        self.radius = rad
+        super().recreate()
+
     def move_to(self, x, y):
         self.x_center = x
         self.y_center = y
-        super().move_to(x, y)
+        super().recreate()
 
     def create_buffer(self):
         # Drawing circle using Second-Order Midpoint Algorithm
@@ -149,10 +156,15 @@ class Ellipse(DrawableObject):
         self.y_center = y_center
         super().__init__(type="Ellipse", **kwargs)
 
+    def change_length(self, v_rad, h_rad):
+        self.v_radius = v_rad
+        self.h_radius = h_rad
+        super().recreate()
+
     def move_to(self, x, y):
         self.x_center = x
         self.y_center = y
-        super().move_to(x, y)
+        super().recreate()
 
     def create_buffer(self):
         x = 0
