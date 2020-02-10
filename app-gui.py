@@ -162,7 +162,7 @@ class Application:
     # ----Window and Toolbar Booleans----
     showDrawTools = False
     showLayers = False
-    showTests = False
+    showTests = True
     # ----Window and Toolbar Booleans----
 
     def update(self, dt):
@@ -255,7 +255,7 @@ class Application:
         # ----Imgui Menu Bar Rendering----
 
     # ----Drawing/Rendering Variables----
-    # --Mouse Draw Variables
+    # --Mouse Draw Variables--
     mouse_draw = False  # Checks whether modifier is kept held down during drag
     start_x_pos = 0  # Click position
     start_y_pos = 0
@@ -263,13 +263,27 @@ class Application:
     end_y_pos = 0
     cursor_x_pos = 0  # Current cursor position
     cursor_y_pos = 0
-    # --Mouse Draw Variables
+    # --Mouse Draw Variables--
+
+    # --General Draw Variables--
     draw_mode = ""  # used to specify what to draw
     color = [0., 0., 0.]  # color values in float, rgb
     vrad = 0  # store vertical radius for ellipse, radius for circle
     hrad = 0  # stores horizontal radius for ellipse, unused for circle
     x_center = 400  # see x_center in cga_lib.py
     y_center = 300  # see y_center in cga_lib.py
+    # --General Draw Variables--
+
+    # --Variables to Modify Layers--
+    object_is_selected = False
+    select_index = [] # currently selected index
+    selected = -1
+    mod_color = [0., 0., 0.]  # color values in float, rgb
+    mod_vrad = 0  # store vertical radius for ellipse, radius for circle
+    mod_hrad = 0  # stores horizontal radius for ellipse, unused for circle
+    mod_x_center = 400  # see x_center in cga_lib.py
+    mod_y_center = 300  # see y_center in cga_lib.py
+    # --Variables to Modify Layers--
     # ----Drawing/Rendering Variables----
 
     # ----Only used for tests----
@@ -346,9 +360,32 @@ class Application:
 
     delete_index = 1
 
+    def setCurrentValues(self, index):
+        # --Set Selected Layer Parameters--
+        if self.object_is_selected:
+            tempColor = [self.canvas.layers[index].current_color.red,
+                         self.canvas.layers[index].current_color.green,
+                         self.canvas.layers[index].current_color.blue]
+            self.mod_color = tempColor
+            if self.canvas.layers[index].shape == "Circle":
+                self.mod_vrad = self.canvas.layers[index].radius
+            elif self.canvas.layers[index].shape == "Ellipse":
+                self.mod_vrad = self.canvas.layers[index].v_radius
+                self.mod_hrad = self.canvas.layers[index].h_radius
+            self.mod_x_center = self.canvas.layers[index].x_center  # see x_center in cga_lib.py
+            self.mod_y_center = self.canvas.layers[index].y_center  # see y_center in cga_lib.py
+        # --Set Selected Layer Parameters--
+
     def layers(self):
         imgui.begin("Layers")
-        if imgui.button("Delete All"):
+        if imgui.button("Refresh Screen", 208, 20):
+            self.window.clear()
+            self.canvas.draw_layers()
+        changed, self.delete_index = imgui.input_int("Layer to delete", self.delete_index, 1, 100)
+        if imgui.button("Delete", 100, 20):
+            self.canvas.delete_object(self.delete_index-1)
+        imgui.same_line()
+        if imgui.button("Delete All", 100, 20):
             clear_index = self.canvas.get_length() - 1
             try:
                 while clear_index >= 0:
@@ -356,15 +393,48 @@ class Application:
                     clear_index = clear_index - 1
             except clear_index == -1:
                 print("No objects found!")
-        if imgui.button("Refresh Screen", 176, 20):
-            self.window.clear()
-            self.canvas.draw_layers()
-        changed, self.delete_index = imgui.input_int("Layer to delete", self.delete_index, 1, 100)
-        if imgui.button("Delete", 100, 20):
-            self.canvas.delete_object(self.delete_index-1)
         index = 0
+
+        # --Modification View
+        if self.object_is_selected:
+            if self.canvas.layers[self.selected].shape == "Circle":
+                changed, self.mod_vrad = imgui.input_int("Radius", self.mod_vrad, 1, 100)  # imgui.core.input_int
+                changed, self.mod_x_center = imgui.input_int("X-axis center", self.mod_x_center, 1, 800)  # imgui.core.slider_int, set max to window size
+                changed, self.mod_y_center = imgui.input_int("Y-axis center", self.mod_y_center, 1, 600)
+                changed, self.mod_color = imgui.color_edit3("Set Color", *self.mod_color)  # asterisk used for tuple, I think...
+            elif self.canvas.layers[self.selected].shape == "Ellipse":
+                changed, self.mod_vrad = imgui.input_int("Vertical Radius", self.mod_vrad, 1, 100)  # imgui.core.input_int
+                changed, self.mod_hrad = imgui.input_int("Horizontal Radius", self.mod_hrad, 1, 100)
+                changed, self.mod_x_center = imgui.input_int("X-axis center", self.mod_x_center, 1, 800)  # imgui.core.slider_int, set max to window size
+                changed, self.mod_y_center = imgui.input_int("Y-axis center", self.mod_y_center, 1, 600)
+                changed, self.mod_color = imgui.color_edit3("Set Color", *self.mod_color)  # asterisk used for tuple, I think...
+            else:
+                pass
+            if imgui.button("Apply", 100, 20):
+                self.canvas.layers[self.selected].move_to(self.mod_x_center, self.mod_y_center)
+                self.canvas.layers[self.selected].set_color(color=Color(self.mod_color[0], self.mod_color[1], self.mod_color[2]))
+                if self.canvas.layers[self.selected].shape == "Circle":
+                    self.canvas.layers[self.selected].change_length(self.mod_vrad)
+                elif self.canvas.layers[self.selected].shape == "Ellipse":
+                    self.canvas.layers[self.selected].change_length(self.mod_vrad, self.mod_hrad)
+            elif imgui.button("Cancel", 100, 20):
+                self.object_is_selected = False
+
+        imgui.new_line()
+        imgui.separator()
+        # --Layer View--
         for layer in self.canvas.layers:
             layer_str = "Layer: {}, shape: {}"
+            imgui.text(layer_str.format(index + 1, layer.shape))
+            layer_lbl = "Select Layer {}"
+            if len(self.select_index) < (index + 1):
+                self.select_index.append(False)
+            if imgui.button(layer_lbl.format(index + 1), 125, 20):
+                self.selected = index
+                self.setCurrentValues(index)
+                self.object_is_selected = True
+            layer_str = "Layer: {}, shape: {}"
+            imgui.same_line()
             imgui.text(layer_str.format(index + 1, layer.shape))
             index = index + 1
         imgui.end()
@@ -406,6 +476,7 @@ class Application:
                 self.canvas = pickle.load(input)
         except FileNotFoundError:
             pass  # Please make a file nor found error dialog
+
 
 def main():
     app = Application()
