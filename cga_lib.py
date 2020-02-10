@@ -183,16 +183,16 @@ class Ellipse(DrawableObject):
 
     def create_buffer(self):
         x = 0
-        y = self.h_radius
+        y = self.v_radius
 
         # Store squared value
         v_sqr = self.v_radius * self.v_radius
         h_sqr = self.h_radius * self.h_radius
 
         # All the d's in region 1
-        d = 4 * h_sqr - 4 * v_sqr * self.h_radius + v_sqr
-        dr = h_sqr * 3
-        ddr = dr + 2 * v_sqr * (1 - self.h_radius)
+        d = 4 * v_sqr - 4 * h_sqr * self.v_radius + h_sqr
+        dr = v_sqr * 3
+        ddr = dr + 2 * h_sqr * (1 - self.v_radius)
 
         self.points += [self.x_center + x, self.y_center + y]
         self.points += [self.x_center - x, self.y_center + y]
@@ -200,16 +200,16 @@ class Ellipse(DrawableObject):
         self.points += [self.x_center + x, self.y_center - y]
 
         # Region 1
-        while 2 * h_sqr * (x + 1) < v_sqr * (2 * y - 1):
+        while 2 * v_sqr * (x + 1) < h_sqr * (2 * y - 1):
             if d > 0:
                 y = y - 1
                 d = d + 4 * ddr
-                dr = dr + 2 * h_sqr
-                ddr = ddr + 2 * (v_sqr + h_sqr)
+                dr = dr + 2 * v_sqr
+                ddr = ddr + 2 * (h_sqr + v_sqr)
             else:
                 d = d + 4 * dr
-                dr = dr + 2 * h_sqr
-                ddr = ddr + 2 * h_sqr
+                dr = dr + 2 * v_sqr
+                ddr = ddr + 2 * v_sqr
             x = x + 1
             self.points += [self.x_center + x, self.y_center + y]
             self.points += [self.x_center - x, self.y_center + y]
@@ -217,21 +217,21 @@ class Ellipse(DrawableObject):
             self.points += [self.x_center + x, self.y_center - y]
 
         # All the d's in region 1
-        dd = v_sqr * (3 - 2 * y)
-        ddr = dd + 2 * h_sqr * (x + 1)
-        d = h_sqr * (2 * x + 1) * (2 * x + 1) + 4 * v_sqr * (y - 1) * (y - 1) - 4 * v_sqr * h_sqr
+        dd = h_sqr * (3 - 2 * y)
+        ddr = dd + 2 * v_sqr * (x + 1)
+        d = v_sqr * (2 * x + 1) * (2 * x + 1) + 4 * h_sqr * (y - 1) * (y - 1) - 4 * h_sqr * v_sqr
 
         # Region 2
         while y > 0:
             if d < 0:
                 x = x + 1
                 d = d + 4 * ddr
-                ddr = ddr + 2 * (v_sqr + h_sqr)
-                dd = dd + 2 * v_sqr
+                ddr = ddr + 2 * (h_sqr + v_sqr)
+                dd = dd + 2 * h_sqr
             else:
                 d = d + 4 * dd
-                ddr = ddr + 2 * v_sqr
-                dd = dd + 2 * v_sqr
+                ddr = ddr + 2 * h_sqr
+                dd = dd + 2 * h_sqr
             y = y - 1
             self.points += [self.x_center + x, self.y_center + y]
             self.points += [self.x_center - x, self.y_center + y]
