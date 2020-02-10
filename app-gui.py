@@ -391,7 +391,9 @@ class Application:
 
     def save(self, path, file_name=""):
         if not file_name == "":
-            file_name += ('.can',)
+            file_name += '.can'
+        elif not path[-3:] == ".can":
+            path += ".can"
         try:
             with open(path + file_name, 'wb') as output:
                 pickle.dump(self.canvas, output, pickle.HIGHEST_PROTOCOL)
@@ -400,7 +402,7 @@ class Application:
 
     def load(self, path, file_name=""):
         if not file_name == "":
-            file_name += ('.can',)
+            file_name += '.can'
         try:
             with open(path + file_name, 'rb') as input:
                 self.canvas = pickle.load(input)
