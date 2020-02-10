@@ -31,7 +31,7 @@ class Application:
     # ----Initializations----
 
     def __init__(self):
-        pyglet.clock.schedule_interval(self.update, 1/60.0)  # calls self.update every 1/60 seconds
+        pyglet.clock.schedule_interval(self.update, 1/30.0)  # calls self.update every 1/60 seconds
 
         @self.window.event
         def on_draw():

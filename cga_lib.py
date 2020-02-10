@@ -1,6 +1,6 @@
 from pyglet.graphics import draw  # Using draw function
 from pyglet.gl import GL_POINTS  # Using point variable in OpenGL library
-
+from math import cos, sin, radians
 
 class Color:
     # Class for defining colors
