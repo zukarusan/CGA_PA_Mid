@@ -52,9 +52,9 @@ class DrawableObject:
     It is aimed to create object to be drawn in the canvas manner.
     """
 
-    def __init__(self, width=1, color=Color(1.0, 1.0, 1.0), type=None):
+    def __init__(self, width=1, color=Color(1.0, 1.0, 1.0), shape=None):
         self.id = None  # ID for layer in canvas
-        self.type = type  # Type of object (circle/ellipse)
+        self.shape= shape  # Type of object (circle/ellipse)
         self.width = width  # Set width pixel of an object, default is 1 px
         self.current_color = color  # Set current color object
         self.colors = []  # Color buffers created to be specified when drawing
@@ -93,11 +93,11 @@ class DrawableObject:
 
 
 class Circle(DrawableObject):
-    def __init__(self, x_center, y_center, radius, **kwargs):
+    def __init__(self, x_center, y_center, radius, shape_lbl="Circle", **kwargs):
         self.radius = radius
         self.x_center = x_center
         self.y_center = y_center
-        super().__init__(type="Circle", **kwargs)
+        super().__init__(shape=shape_lbl, **kwargs)
 
     def change_length(self, rad=None):
         if rad is None:
@@ -159,12 +159,12 @@ class Circle(DrawableObject):
 
 
 class Ellipse(DrawableObject):
-    def __init__(self, x_center, y_center, v_radius, h_radius, **kwargs):
+    def __init__(self, x_center, y_center, v_radius, h_radius, shape_lbl="Ellipse", **kwargs):
         self.v_radius = v_radius
         self.h_radius = h_radius
         self.x_center = x_center
         self.y_center = y_center
-        super().__init__(type="Ellipse", **kwargs)
+        super().__init__(shape=shape_lbl, **kwargs)
 
     def change_length(self, v_rad=None, h_rad=None):
         if v_rad is None and h_rad is None:

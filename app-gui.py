@@ -6,7 +6,7 @@ from tkinter import filedialog
 import pyglet
 from pyglet import gl
 from pyglet.gl import *
-from pyglet.window import key  # for key input, on_key_press
+from pyglet.window import key, mouse  # for key input, on_key_press
 
 import pickle
 import imgui
@@ -24,6 +24,10 @@ class Application:
     renderer = PygletRenderer(window)
     impl = PygletRenderer(window)
     cross = [0, 0]
+    buff_oval = Ellipse(0, 0, 0, 0)  # For creating oval shape using drag mouse later
+    ddx_mouse = 0  # Distinguished from dx in mouse event which is the difference from the first call
+    ddy_mouse = 0  # Same as above for dy
+
     # ----Initializations----
 
     def __init__(self):
@@ -66,41 +70,21 @@ class Application:
         def on_mouse_press(x, y, button, modifiers):
             print("mouse press at: ", x, y)
             if modifiers & key.MOD_SHIFT:
-                self.start_x_pos = x
-                self.start_y_pos = y
-                self.mouse_draw = True
+                if button == mouse.LEFT:
+                    self.ddx_mouse = 0
+                    self.ddy_mouse = 0
+                    self.buff_oval = Ellipse(x, y, 0, 0,
+                                             color=Color(self.color[0], self.color[1], self.color[2]), shape_lbl="Oval")
+                    self.canvas.add_object(self.buff_oval)
+                    self.start_x_pos = x
+                    self.start_y_pos = y
+                    self.mouse_draw = True
 
         # --Mouse Release--
         @self.window.event
         def on_mouse_release(x, y, button, modifiers):
             print("mouse release at: ", x, y)
             if modifiers & key.MOD_SHIFT:
-                self.end_x_pos = x
-                self.end_y_pos = x
-                if self.mouse_draw:
-                    dx = self.start_x_pos - self.end_x_pos
-                    dy = self.start_y_pos - self.end_y_pos
-                    dx = abs(dx)
-                    dy = abs(dy)
-                    self.hrad = round(dx/2)
-                    self.vrad = round(dy/2)
-                    if self.start_x_pos <= self.end_x_pos:
-                        if self.start_y_pos <= self.end_y_pos:
-                            self.x_center = self.start_x_pos + round(dx/2)
-                            self.y_center = self.start_y_pos + round(dy/2)
-                        else:
-                            self.x_center = self.start_x_pos + round(dx / 2)
-                            self.y_center = self.end_y_pos + round(dy / 2)
-                    else:
-                        if self.start_y_pos <= self.end_y_pos:
-                            self.x_center = self.end_x_pos + round(dx/2)
-                            self.y_center = self.start_y_pos + round(dy/2)
-                        else:
-                            self.x_center = self.end_x_pos + round(dx / 2)
-                            self.y_center = self.end_y_pos + round(dy / 2)
-                    if self.draw_mode == "c":
-                        self.vrad = max(self.vrad, self.hrad)
-                self.createObject()
                 self.mouse_draw = False
             else:
                 if self.mouse_draw:
@@ -111,6 +95,11 @@ class Application:
         def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
             self.cursor_x_pos = x
             self.cursor_y_pos = y
+            self.ddx_mouse += dx
+            self.ddy_mouse += dy
+            if modifiers & key.MOD_SHIFT:
+                if buttons == mouse.LEFT:
+                    self.buff_oval.change_length(v_rad=abs(self.ddy_mouse), h_rad=abs(self.ddx_mouse))
             if modifiers & key.MOD_CTRL:
                 print(x, y, dx, dy)
             '''
@@ -375,8 +364,8 @@ class Application:
             self.canvas.delete_object(self.delete_index-1)
         index = 0
         for layer in self.canvas.layers:
-            layer_str = "Layer: {}, type: {}"
-            imgui.text(layer_str.format(index + 1, layer.type))
+            layer_str = "Layer: {}, shape: {}"
+            imgui.text(layer_str.format(index + 1, layer.shape))
             index = index + 1
         imgui.end()
 
