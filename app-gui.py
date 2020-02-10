@@ -304,6 +304,13 @@ class Application:
 
     def drawTools(self):
         imgui.begin("Drawing Tools")
+        if self.draw_mode == "c":
+            imgui.text_colored("Currently drawing: Circle", 0.0, 1.0, 0.0)
+        elif self.draw_mode == "e":
+            imgui.text_colored("Currently drawing: Circle", 0.0, 1.0, 0.0)
+        else:
+            imgui.text_colored("Nothing Currently Selected.", 0.0, 1.0, 0.0)
+        imgui.new_line()
         if imgui.button("Circle", 100, 20):  # imgui.core.button, https://github.com/ocornut/imgui/issues/2481
             self.draw_mode = 'c'
         imgui.same_line(115)
@@ -323,22 +330,6 @@ class Application:
             changed, self.y_center = imgui.input_int("Y-axis center", self.y_center, 1, 600)
             changed, self.color = imgui.color_edit3("Set Color", *self.color)  # asterisk used for tuple, I think...
         imgui.new_line()
-        imgui.begin_child("Current Settings", border=True)  # imgui.core.begin_child
-        imgui.text("Currently Drawing: ")  # imgui.core.text
-        if self.draw_mode == "c":
-            imgui.same_line(200), imgui.text_colored("Circle", 0, 1, 0)  # imgui.core.same_line, imgui.core.text_colored
-            imgui.text("Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
-            imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
-            imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
-        elif self.draw_mode == "e":
-            imgui.same_line(200), imgui.text_colored("Ellipse", 0, 1, 0)
-            imgui.text("V. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.vrad), 0, 1, 0)
-            imgui.text("H. Radius:"), imgui.same_line(200), imgui.text_colored(str(self.hrad), 0, 1, 0)
-            imgui.text("X Position:"), imgui.same_line(200), imgui.text_colored(str(self.x_center), 0, 1, 0)
-            imgui.text("Y Position:"), imgui.same_line(200), imgui.text_colored(str(self.y_center), 0, 1, 0)
-        else:
-            imgui.text("Nothing Selected")
-        imgui.end_child()
         if imgui.button("Reset", 100, 20):
             self.color = [.0, .0, .0]
             self.draw_mode = ""
