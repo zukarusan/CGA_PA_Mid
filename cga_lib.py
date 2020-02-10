@@ -56,6 +56,7 @@ class DrawableObject:
         self.id = None  # ID for layer in canvas
         self.type = type  # Type of object (circle/ellipse)
         self.width = width  # Set width pixel of an object, default is 1 px
+        self.current_color = color  # Set current color object
         self.colors = []  # Color buffers created to be specified when drawing
         self.points = []  # Point buffers created to be drawn in canvas
         self.buffer_size = None  # Number of buffers
@@ -77,9 +78,11 @@ class DrawableObject:
     def recreate(self):
         self.points.clear()
         self.create_buffer()
+        self.set_color(self.current_color)
 
     def set_color(self, color):
         if not self.buffer_size == 0:
+            self.current_color = color
             self.colors.clear()
             for b in range(self.buffer_size):
                 self.colors += [color.red]
