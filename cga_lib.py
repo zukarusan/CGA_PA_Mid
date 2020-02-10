@@ -71,6 +71,9 @@ class DrawableObject:
     def set_layer_id(self, id):  # Function to set the id in canvas layers
         self.id = id
 
+    def change_length(self):
+        pass
+
     def recreate(self):
         self.points.clear()
         self.create_buffer()
@@ -93,9 +96,13 @@ class Circle(DrawableObject):
         self.y_center = y_center
         super().__init__(type="Circle", **kwargs)
 
-    def change_radius(self, rad):
-        self.radius = rad
-        super().recreate()
+    def change_length(self, rad=None):
+        if rad is None:
+            print("None length to change")
+            return
+        else:
+            self.radius = rad
+            super().recreate()
 
     def move_to(self, x, y):
         self.x_center = x
@@ -156,9 +163,14 @@ class Ellipse(DrawableObject):
         self.y_center = y_center
         super().__init__(type="Ellipse", **kwargs)
 
-    def change_length(self, v_rad, h_rad):
-        self.v_radius = v_rad
-        self.h_radius = h_rad
+    def change_length(self, v_rad=None, h_rad=None):
+        if v_rad is None and h_rad is None:
+            print("None length to change")
+            return
+        if v_rad is not None:
+            self.v_radius = v_rad
+        if h_rad is not None:
+            self.h_radius = h_rad
         super().recreate()
 
     def move_to(self, x, y):
