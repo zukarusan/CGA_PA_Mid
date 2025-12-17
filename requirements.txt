@@ -1,4 +1,4 @@
-future==0.18.2
+future==1.0.0
 pygame==1.9.6
 pyglet==1.4.9
 pyOpenGL==3.1.5
